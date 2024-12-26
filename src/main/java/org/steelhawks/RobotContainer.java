@@ -5,16 +5,24 @@
 
 package org.steelhawks;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.Constants.*;
 import org.steelhawks.commands.swerve.DriveCommands;
 import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.*;
+import org.steelhawks.subsystems.flywheel.Flywheel;
+import org.steelhawks.subsystems.flywheel.FlywheelIO;
+import org.steelhawks.subsystems.flywheel.FlywheelIOSim;
+import org.steelhawks.subsystems.flywheel.FlywheelIOTalonFX;
 import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
 import org.steelhawks.subsystems.intake.IntakeIOSim;
@@ -38,6 +46,7 @@ public class RobotContainer {
     private final Autos s_Autos = Autos.getInstance();
     public static Swerve s_Swerve;
     public static Intake s_Intake;
+    public static Flywheel s_Flywheel;
     private final LED s_LED = LED.getInstance();
 
     private final CommandXboxController driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -50,6 +59,8 @@ public class RobotContainer {
 
     /* Button Bindings for Operator */
     private final Trigger bToggleNormalMode = operator.start().and(operator.back());
+
+    private final LoggedDashboardChooser<Command> autoChooser;
 
     private boolean mRan = false;
 
@@ -95,6 +106,8 @@ public class RobotContainer {
                         new ModuleIOTalonFX(3));
                 s_Intake =
                     new Intake(new IntakeIOTalonFX());
+                s_Flywheel =
+                    new Flywheel(new FlywheelIOTalonFX());
             }
             case SIM -> {
                 s_Swerve =
@@ -106,6 +119,8 @@ public class RobotContainer {
                         new ModuleIOSim());
                 s_Intake
                     = new Intake(new IntakeIOSim());
+                s_Flywheel =
+                    new Flywheel(new FlywheelIOSim());
             }
 
             default -> {
@@ -118,6 +133,8 @@ public class RobotContainer {
                         new ModuleIO() {});
                 s_Intake
                     = new Intake(new IntakeIO() {});
+                s_Flywheel =
+                    new Flywheel(new FlywheelIO() {});
             }
         }
 
@@ -127,6 +144,29 @@ public class RobotContainer {
         configureOperator();
         configureTriggers();
         configureDriver();
+
+
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+        // Set up SysId routines
+        autoChooser.addOption(
+            "Drive SysId (Quasistatic Forward)",
+            s_Swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+            "Drive SysId (Quasistatic Reverse)",
+            s_Swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+            "Drive SysId (Dynamic Forward)", s_Swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+            "Drive SysId (Dynamic Reverse)", s_Swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+            "Top Flywheel SysId (Quasistatic Forward)", s_Flywheel.runSysIdQuasistaticTop(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+            "Top Flywheel SysId (Quasistatic Reverse)", s_Flywheel.runSysIdQuasistaticTop(SysIdRoutine.Direction.kReverse));
+        autoChooser.addOption(
+            "Bottom Flywheel SysId (Quasistatic Forward)", s_Flywheel.runSysIdQuasistaticBottom(SysIdRoutine.Direction.kForward));
+        autoChooser.addOption(
+            "Bottom Flywheel SysId (Quasistatic Reverse)", s_Flywheel.runSysIdQuasistaticBottom(SysIdRoutine.Direction.kReverse));
     }
 
     private void configurePathfindingCommands() {
@@ -154,6 +194,8 @@ public class RobotContainer {
         bToggleSpeedMultiplier.onTrue(s_Swerve.toggleMultiplier().alongWith(s_LED.flashCommand(s_Swerve.isSlowMode() ? LED.LEDColor.RED : LED.LEDColor.GREEN, .2, 1)));
         bToggleVisionMeasurement.onTrue(Commands.runOnce(() -> addVisionMeasurement = !addVisionMeasurement));
 //        bResetGyro.onTrue(s_Swerve.zeroHeading());
+
+        driver.leftBumper().whileTrue(s_Flywheel.rampSubwoofer());
     }
 
     private void configureOperator() {
