@@ -18,7 +18,7 @@ public final class Constants {
     public static boolean IN_REPLAY_MODE = false;
 
     /** The CAN loop name on Phoenix Tuner */
-    public static String CANIVORE_NAME = "";
+    public static String CANIVORE_NAME = "canivore";
 
     /**
      * This defines the runtime mode used by AdvantageKit. The mode is always "real" when running

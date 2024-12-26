@@ -15,6 +15,10 @@ import org.steelhawks.Constants.*;
 import org.steelhawks.commands.swerve.DriveCommands;
 import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.*;
+import org.steelhawks.subsystems.intake.Intake;
+import org.steelhawks.subsystems.intake.IntakeIO;
+import org.steelhawks.subsystems.intake.IntakeIOSim;
+import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 
 
@@ -28,9 +32,12 @@ public class RobotContainer {
     private final Trigger isTestMode = new Trigger(() -> Robot.getState() == Robot.RobotState.TEST && robotMode == RobotMode.NORMAL_MODE);
 
     /* Subsystems */
-    /** Do not delete any of these, or they won't be instantiated even if they are unused */
+    /**
+     * Do not delete any of these, or they won't be instantiated even if they are unused
+     */
     private final Autos s_Autos = Autos.getInstance();
     public static Swerve s_Swerve;
+    public static Intake s_Intake;
     private final LED s_LED = LED.getInstance();
 
     private final CommandXboxController driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
@@ -78,28 +85,40 @@ public class RobotContainer {
 //        new Thread(this::waitForDS).start();
 
         switch (Constants.CURRENT_MODE) {
-            case REAL -> s_Swerve =
-                new Swerve(
-                    new GyroIOPigeon2(true),
-                    new ModuleIOTalonFX(0),
-                    new ModuleIOTalonFX(1),
-                    new ModuleIOTalonFX(2),
-                    new ModuleIOTalonFX(3));
-            case SIM -> s_Swerve =
-                new Swerve(
-                    new GyroIO() {},
-                    new ModuleIOSim(),
-                    new ModuleIOSim(),
-                    new ModuleIOSim(),
-                    new ModuleIOSim());
+            case REAL -> {
+                s_Swerve =
+                    new Swerve(
+                        new GyroIOPigeon2(true),
+                        new ModuleIOTalonFX(0),
+                        new ModuleIOTalonFX(1),
+                        new ModuleIOTalonFX(2),
+                        new ModuleIOTalonFX(3));
+                s_Intake =
+                    new Intake(new IntakeIOTalonFX());
+            }
+            case SIM -> {
+                s_Swerve =
+                    new Swerve(
+                        new GyroIO() {},
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new ModuleIOSim());
+                s_Intake
+                    = new Intake(new IntakeIOSim());
+            }
 
-            default -> s_Swerve =
-                new Swerve(
-                    new GyroIO() {},
-                    new ModuleIO() {},
-                    new ModuleIO() {},
-                    new ModuleIO() {},
-                    new ModuleIO() {});
+            default -> {
+                s_Swerve =
+                    new Swerve(
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {});
+                s_Intake
+                    = new Intake(new IntakeIO() {});
+            }
         }
 
         configureDefaultCommands();
@@ -110,7 +129,8 @@ public class RobotContainer {
         configureDriver();
     }
 
-    private void configurePathfindingCommands() {}
+    private void configurePathfindingCommands() {
+    }
 
     private void configureTestCommands() {
         /* Sample Test Mode */
@@ -126,7 +146,8 @@ public class RobotContainer {
                 ).withName("Pit Test"));
     }
 
-    private void configureAltBindings() {}
+    private void configureAltBindings() {
+    }
 
     /* Bindings */
     private void configureDriver() {
@@ -143,7 +164,8 @@ public class RobotContainer {
         );
     }
 
-    private void configureTriggers() {}
+    private void configureTriggers() {
+    }
 
     private void configureDefaultCommands() {
         s_Swerve.setDefaultCommand(
