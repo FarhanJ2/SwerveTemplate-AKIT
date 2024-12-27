@@ -7,6 +7,7 @@ package org.steelhawks;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import edu.wpi.first.wpilibj.ADIS16448_IMU;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +28,10 @@ import org.steelhawks.subsystems.intake.Intake;
 import org.steelhawks.subsystems.intake.IntakeIO;
 import org.steelhawks.subsystems.intake.IntakeIOSim;
 import org.steelhawks.subsystems.intake.IntakeIOTalonFX;
+import org.steelhawks.subsystems.pivot.Pivot;
+import org.steelhawks.subsystems.pivot.PivotIO;
+import org.steelhawks.subsystems.pivot.PivotIOSim;
+import org.steelhawks.subsystems.pivot.PivotIOTalonFX;
 import org.steelhawks.subsystems.swerve.*;
 
 
@@ -47,10 +52,13 @@ public class RobotContainer {
     public static Swerve s_Swerve;
     public static Intake s_Intake;
     public static Flywheel s_Flywheel;
+    public static Pivot s_Pivot;
     private final LED s_LED = LED.getInstance();
 
     private final CommandXboxController driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
     private final CommandXboxController operator = new CommandXboxController(OIConstants.OPERATOR_CONTROLLER_PORT);
+
+    private OperatorLock mPivotLock = OperatorLock.LOCKED;
 
     /* Button Bindings for Driver */
     private final Trigger bResetGyro = driver.b();
@@ -62,34 +70,19 @@ public class RobotContainer {
 
     private final LoggedDashboardChooser<Command> autoChooser;
 
-    private boolean mRan = false;
-
     public void waitForDS() {
-//        while (!DriverStation.isDSAttached() && !mRan) { // make sure this does not run outside its thread
-//            DriverStation.reportWarning("Attaching to the Driver Station...", false);
-//        }
-//
-//        DriverStation.reportWarning("Driver Station Attached", false);
 
         if (DriverStation.getAlliance().isPresent()) {
             alliance = DriverStation.getAlliance().get();
         }
 
         s_LED.setDefaultLighting(s_LED.bounceWaveCommand(alliance == Alliance.Red ? LED.LEDColor.RED : LED.LEDColor.BLUE));
+        /* Does nothing, just gets the library ready */
+        PathfindingCommand.warmupCommand()
+            .finallyDo(() -> s_Swerve.setPose(alliance == Alliance.Blue ? Pose.Blue.ORIGIN : Pose.Red.ORIGIN)) // add this to reset to origin as warmup moves robot pose
+            .schedule();
 
-        if (!mRan) {
-//            s_Swerve.initializePoseEstimator();
-
-            /* Does nothing, just gets the library ready */
-            PathfindingCommand.warmupCommand()
-                .finallyDo(() -> s_Swerve.setPose(alliance == Alliance.Blue ? Pose.Blue.ORIGIN : Pose.Red.ORIGIN)) // add this to reset to origin as warmup moves robot pose
-                .schedule();
-
-            configurePathfindingCommands();
-        }
-
-        s_Swerve.setPose(alliance == Alliance.Red ? Pose.Red.ORIGIN : Pose.Blue.ORIGIN);
-        mRan = true;
+        configurePathfindingCommands();
     }
 
     public RobotContainer() {
@@ -108,6 +101,8 @@ public class RobotContainer {
                     new Intake(new IntakeIOTalonFX());
                 s_Flywheel =
                     new Flywheel(new FlywheelIOTalonFX());
+                s_Pivot =
+                    new Pivot(new PivotIOTalonFX());
             }
             case SIM -> {
                 s_Swerve =
@@ -121,6 +116,8 @@ public class RobotContainer {
                     = new Intake(new IntakeIOSim());
                 s_Flywheel =
                     new Flywheel(new FlywheelIOSim());
+                s_Pivot
+                    = new Pivot(new PivotIOSim());
             }
 
             default -> {
@@ -135,6 +132,8 @@ public class RobotContainer {
                     = new Intake(new IntakeIO() {});
                 s_Flywheel =
                     new Flywheel(new FlywheelIO() {});
+                s_Pivot =
+                    new Pivot(new PivotIO() {});
             }
         }
 
@@ -186,8 +185,7 @@ public class RobotContainer {
                 ).withName("Pit Test"));
     }
 
-    private void configureAltBindings() {
-    }
+    private void configureAltBindings() {}
 
     /* Bindings */
     private void configureDriver() {
@@ -204,6 +202,25 @@ public class RobotContainer {
                 Commands.runOnce(() -> robotMode = RobotMode.ALT_MODE),
                 Commands.runOnce(() -> robotMode = RobotMode.NORMAL_MODE), isNormalMode)
         );
+
+        operator.leftStick()
+            .onTrue(
+                Commands.either(
+                    Commands.runOnce(() -> {
+                        mPivotLock = OperatorLock.LOCKED;
+                        s_Pivot.disable();
+                        s_Pivot.setDefault(
+                            s_Pivot.runPivotManual(operator::getLeftY)
+                        );
+                    }),
+                    Commands.runOnce(() -> {
+                        mPivotLock = OperatorLock.UNLOCKED;
+                        s_Pivot.enable();
+                        s_Pivot.setDefault(
+                            s_Pivot.setPivotHome()
+                        );
+                    }), () -> mPivotLock == OperatorLock.UNLOCKED)
+                );
     }
 
     private void configureTriggers() {
