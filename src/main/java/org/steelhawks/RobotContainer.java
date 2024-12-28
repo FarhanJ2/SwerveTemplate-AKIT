@@ -52,8 +52,6 @@ public class RobotContainer {
     private final CommandXboxController driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
     private final CommandXboxController operator = new CommandXboxController(OIConstants.OPERATOR_CONTROLLER_PORT);
 
-    private OperatorLock mPivotLock = OperatorLock.LOCKED;
-
     /* Button Bindings for Driver */
     private final Trigger bResetGyro = driver.b();
     private final Trigger bToggleVisionMeasurement = driver.povLeft();
@@ -61,8 +59,6 @@ public class RobotContainer {
 
     /* Button Bindings for Operator */
     private final Trigger bToggleNormalMode = operator.start().and(operator.back());
-
-    private final LoggedDashboardChooser<Command> mSysIdSelector;
 
     public void waitForDS() {
 
@@ -80,8 +76,6 @@ public class RobotContainer {
     }
 
     public RobotContainer() {
-        mSysIdSelector = new LoggedDashboardChooser<>("SysId Choices", AutoBuilder.buildAutoChooser());
-
         switch (Constants.CURRENT_MODE) {
             case REAL -> {
                 s_Swerve =
@@ -141,6 +135,9 @@ public class RobotContainer {
     }
 
     private void configureSysIdBindings() {
+
+        LoggedDashboardChooser<Command> mSysIdSelector = new LoggedDashboardChooser<>("SysId Choices", AutoBuilder.buildAutoChooser());
+
         // Set up SysId routines
         mSysIdSelector.addOption(
             "Drive SysId (Quasistatic Forward)",
@@ -197,23 +194,7 @@ public class RobotContainer {
         );
 
         operator.leftStick()
-            .onTrue(
-                Commands.either(
-                    Commands.runOnce(() -> {
-                        mPivotLock = OperatorLock.LOCKED;
-                        s_Pivot.disable();
-                        s_Pivot.setDefault(
-                            s_Pivot.runPivotManual(operator::getLeftY)
-                        );
-                    }),
-                    Commands.runOnce(() -> {
-                        mPivotLock = OperatorLock.UNLOCKED;
-                        s_Pivot.enable();
-                        s_Pivot.setDefault(
-                            s_Pivot.setPivotHome()
-                        );
-                    }), () -> mPivotLock == OperatorLock.UNLOCKED)
-                );
+            .onTrue(s_Pivot.toggleManual(operator::getLeftY));
     }
 
     private void configureTriggers() {

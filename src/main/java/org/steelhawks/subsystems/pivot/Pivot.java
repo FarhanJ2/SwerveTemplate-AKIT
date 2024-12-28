@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.OperatorLock;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -21,6 +22,7 @@ public class Pivot extends SubsystemBase {
 
     private final PivotIOInputsAutoLogged inputs = new PivotIOInputsAutoLogged();
     private final PivotIO io;
+    private OperatorLock mPivotLock = OperatorLock.LOCKED;
 
     private boolean mEnabled = false;
 
@@ -88,6 +90,24 @@ public class Pivot extends SubsystemBase {
         io.runPivot(fb + ff);
     }
 
+
+    public Command toggleManual(DoubleSupplier operator) {
+        return Commands.either(
+            Commands.runOnce(() -> {
+                mPivotLock = OperatorLock.LOCKED;
+                disable();
+                setDefault(
+                    runPivotManual(operator)
+                );
+            }),
+            Commands.runOnce(() -> {
+                mPivotLock = OperatorLock.UNLOCKED;
+                enable();
+                setDefault(
+                    setPivotHome()
+                );
+            }), () -> mPivotLock == OperatorLock.UNLOCKED);
+    }
 
 
     public Command runPivotManual(DoubleSupplier joystickValue) {

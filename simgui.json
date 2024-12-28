@@ -15,6 +15,7 @@
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Go to Team Speaker": "Command",
       "/SmartDashboard/SysID Routine": "Command",
+      "/SmartDashboard/SysId Choices": "String Chooser",
       "/SmartDashboard/swerve/field": "Field2d"
     },
     "windows": {
