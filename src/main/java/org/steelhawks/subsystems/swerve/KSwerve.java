@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
-import org.steelhawks.CTREConfigs;
 import org.steelhawks.lib.COTSTalonFXSwerveConstants;
 import org.steelhawks.lib.SwerveModuleConstants;
 
@@ -16,8 +15,6 @@ import org.steelhawks.lib.SwerveModuleConstants;
  * All constants for Swerve
  */
 public final class KSwerve {
-
-    public static final CTREConfigs CONFIGS = new CTREConfigs();
 
     public static final int PIGEON_ID = 0; // set up for your robot
     public static final COTSTalonFXSwerveConstants CHOSEN_MODULE = // configure with your own robot drivetrain
