@@ -36,7 +36,6 @@ import org.steelhawks.subsystems.swerve.*;
 public class RobotContainer {
 
     public static boolean addVisionMeasurement = false;
-    private static Alliance alliance;
 
     private RobotMode robotMode = RobotMode.NORMAL_MODE;
     private final Trigger isNormalMode = new Trigger(() -> robotMode == RobotMode.NORMAL_MODE);
@@ -61,15 +60,15 @@ public class RobotContainer {
     private final Trigger bToggleNormalMode = operator.start().and(operator.back());
 
     public void waitForDS() {
+        boolean isRed =
+            DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red;
 
-        if (DriverStation.getAlliance().isPresent()) {
-            alliance = DriverStation.getAlliance().get();
-        }
 
-        s_LED.setDefaultLighting(s_LED.bounceWaveCommand(alliance == Alliance.Red ? LED.LEDColor.RED : LED.LEDColor.BLUE));
+        s_LED.setDefaultLighting(s_LED.bounceWaveCommand(isRed ? LED.LEDColor.RED : LED.LEDColor.BLUE));
         /* Does nothing, just gets the library ready */
         PathfindingCommand.warmupCommand()
-            .finallyDo(() -> s_Swerve.setPose(alliance == Alliance.Blue ? Pose.Blue.ORIGIN : Pose.Red.ORIGIN)) // add this to reset to origin as warmup moves robot pose
+            .finallyDo(() -> s_Swerve.setPose(!isRed ? Pose.Blue.ORIGIN : Pose.Red.ORIGIN)) // add this to reset to origin as warmup moves robot pose
             .schedule();
 
         configurePathfindingCommands();
@@ -100,12 +99,12 @@ public class RobotContainer {
                         new ModuleIOSim(),
                         new ModuleIOSim(),
                         new ModuleIOSim());
-                s_Intake
-                    = new Intake(new IntakeIOSim());
+                s_Intake =
+                    new Intake(new IntakeIOSim());
                 s_Flywheel =
                     new Flywheel(new FlywheelIOSim());
-                s_Pivot
-                    = new Pivot(new PivotIOSim());
+                s_Pivot =
+                    new Pivot(new PivotIOSim());
             }
 
             default -> {
@@ -116,8 +115,8 @@ public class RobotContainer {
                         new ModuleIO() {},
                         new ModuleIO() {},
                         new ModuleIO() {});
-                s_Intake
-                    = new Intake(new IntakeIO() {});
+                s_Intake =
+                    new Intake(new IntakeIO() {});
                 s_Flywheel =
                     new Flywheel(new FlywheelIO() {});
                 s_Pivot =
@@ -135,8 +134,8 @@ public class RobotContainer {
     }
 
     private void configureSysIdBindings() {
-
-        LoggedDashboardChooser<Command> mSysIdSelector = new LoggedDashboardChooser<>("SysId Choices", AutoBuilder.buildAutoChooser());
+        LoggedDashboardChooser<Command> mSysIdSelector =
+            new LoggedDashboardChooser<>("SysId Choices", AutoBuilder.buildAutoChooser());
 
         // Set up SysId routines
         mSysIdSelector.addOption(
@@ -190,8 +189,7 @@ public class RobotContainer {
         bToggleNormalMode.onTrue(
             Commands.either(
                 Commands.runOnce(() -> robotMode = RobotMode.ALT_MODE),
-                Commands.runOnce(() -> robotMode = RobotMode.NORMAL_MODE), isNormalMode)
-        );
+                Commands.runOnce(() -> robotMode = RobotMode.NORMAL_MODE), isNormalMode));
 
         operator.leftStick()
             .onTrue(s_Pivot.toggleManual(operator::getLeftY));
@@ -203,14 +201,9 @@ public class RobotContainer {
     private void configureDefaultCommands() {
         s_Swerve.setDefaultCommand(
             DriveCommands.joystickDrive(
-                s_Swerve,
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX(),
                 driver.leftTrigger(.5)).withName("Teleop Drive"));
-    }
-
-    public static Alliance getAlliance() {
-        return alliance;
     }
 }

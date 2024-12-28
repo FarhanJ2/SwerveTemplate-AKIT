@@ -28,11 +28,14 @@ import org.steelhawks.Constants.*;
 import java.util.function.DoubleSupplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.steelhawks.RobotContainer;
 import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.swerve.KSwerve;
 import org.steelhawks.subsystems.swerve.Swerve;
 
 public class DriveCommands {
+
+    private static final Swerve s_Swerve = RobotContainer.s_Swerve;
     private static final double DEADBAND = 0.3;
 
     private DriveCommands() {}
@@ -42,24 +45,23 @@ public class DriveCommands {
     }
 
     @AutoLogOutput(key = "Swerve/RotationSpeed")
-    private static double getRotationSpeedFromPID(Swerve drive, Pose2d target) {
-        double robotHeading = continuous180To360(drive.getRotation().getDegrees());
+    private static double getRotationSpeedFromPID(Pose2d target) {
+        double robotHeading = continuous180To360(s_Swerve.getRotation().getDegrees());
         double requestedAngle =
-            drive.calculateTurnAngle(
-                target, drive.getRotation().getDegrees() + (AllianceFlip.shouldFlip() ? 360 : 180));
+            s_Swerve.calculateTurnAngle(
+                target, s_Swerve.getRotation().getDegrees() + (AllianceFlip.shouldFlip() ? 360 : 180));
         double setpoint = (robotHeading + requestedAngle) % 360;
 
-        return (drive.isSlowMode() ? 5 : 1)
-            * drive
+        return (s_Swerve.isSlowMode() ? 5 : 1)
+            * s_Swerve
             .getAlignPID()
-            .calculate(continuous180To360(drive.getRotation().getDegrees()), setpoint);
+            .calculate(continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint);
     }
 
     /**
      * Field relative drive command using two joysticks (controlling linear and angular velocities).
      */
     public static Command joystickDrive(
-        Swerve drive,
         DoubleSupplier xSupplier,
         DoubleSupplier ySupplier,
         DoubleSupplier omegaSupplier,
@@ -80,7 +82,7 @@ public class DriveCommands {
 
                 if (alignToSpeaker.getAsBoolean()) {
                     Pose2d speaker = AllianceFlip.validate(FieldConstants.BLUE_SPEAKER_POSE);
-                    omega = getRotationSpeedFromPID(drive, speaker);
+                    omega = getRotationSpeedFromPID(speaker);
                 }
 
                 Translation2d linearVelocity =
@@ -88,16 +90,35 @@ public class DriveCommands {
                         .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
                         .getTranslation();
 
-                drive.runVelocity(
+                s_Swerve.runVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                         (linearVelocity.getX() * KSwerve.MAX_LINEAR_SPEED)
-                            * drive.getMultiplier(),
+                            * s_Swerve.getMultiplier(),
                         (linearVelocity.getY() * KSwerve.MAX_LINEAR_SPEED)
-                            * drive.getMultiplier(),
-                        (omega * KSwerve.MAX_ANGULAR_SPEED) * drive.getMultiplier(),
-                        AllianceFlip.shouldFlip()
-                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                            : drive.getRotation()));
-            }, drive);
+                            * s_Swerve.getMultiplier(),
+                        (omega * KSwerve.MAX_ANGULAR_SPEED) * s_Swerve.getMultiplier(),
+                        AllianceFlip.shouldFlip() ?
+                            s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
+                                : s_Swerve.getRotation()));
+            }, s_Swerve);
+    }
+
+
+    public static Command rotateToAngle(DoubleSupplier requestedAngle) {
+
+        double robotHeading = continuous180To360(s_Swerve.getRotation().getDegrees());
+        double setpoint = (robotHeading + requestedAngle.getAsDouble()) % 360;
+
+        return Commands.run(
+            () ->
+                s_Swerve.runVelocity(
+                    ChassisSpeeds.fromFieldRelativeSpeeds(
+                        0, 0,
+                        (s_Swerve.isSlowMode()) ? 5 : 1
+                            * s_Swerve.getAlignPID().calculate(continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint),
+                        AllianceFlip.shouldFlip() ?
+                            s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
+                            : s_Swerve.getRotation())), s_Swerve)
+                                .until(() -> RobotContainer.s_Swerve.getAlignPID().atSetpoint());
     }
 }
