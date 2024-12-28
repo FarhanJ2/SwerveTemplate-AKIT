@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.Constants.*;
 import java.util.Map;
 
-public class Autos {
+public final class Autos {
 
     /** Add your NamedCommands here */
     private static final Map<String, Command> mNamedCommands = Map.of(
@@ -17,18 +17,13 @@ public class Autos {
     );
 
     /* Change to the amount of autons we have */
-    private final DigitalInput[] mAutonSelector = {
+    private static final DigitalInput[] mAutonSelector = {
         new DigitalInput(SelectorConstants.AUTON_PORT_1),
         new DigitalInput(SelectorConstants.AUTON_PORT_2),
         new DigitalInput(SelectorConstants.AUTON_PORT_3),
     };
 
-    private final static Autos INSTANCE = new Autos();
-    public static Autos getInstance() {
-        return INSTANCE;
-    }
-
-    private Autos() {
+    static {
         NamedCommands.registerCommands(mNamedCommands);
     }
 
@@ -94,7 +89,7 @@ public class Autos {
         }
     }
 
-    private int getSelector() {
+    private static int getSelector() {
         for (int i = 0; i < mAutonSelector.length; i++) {
             if (!mAutonSelector[i].get()) {
                 return i;
@@ -104,15 +99,15 @@ public class Autos {
         return -1;
     }
 
-    public Command getAutonomousCommand() {
+    public static Command getAutonomousCommand() {
         return AutonMode.getCommand(getSelector());
     }
 
-    public boolean getUseVision() {
+    public static boolean getUseVision() {
         return AutonMode.getUseVision(getSelector());
     }
 
-    public String getAutonName() {
+    public static String getAutonName() {
         return AutonMode.getAutonName(getSelector());
     }
 }

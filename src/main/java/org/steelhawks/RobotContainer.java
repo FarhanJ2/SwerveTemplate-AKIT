@@ -7,7 +7,6 @@ package org.steelhawks;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import edu.wpi.first.wpilibj.ADIS16448_IMU;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.Constants.*;
 import org.steelhawks.commands.swerve.DriveCommands;
-import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.*;
 import org.steelhawks.subsystems.flywheel.Flywheel;
 import org.steelhawks.subsystems.flywheel.FlywheelIO;
@@ -45,10 +43,6 @@ public class RobotContainer {
     private final Trigger isTestMode = new Trigger(() -> Robot.getState() == Robot.RobotState.TEST && robotMode == RobotMode.NORMAL_MODE);
 
     /* Subsystems */
-    /**
-     * Do not delete any of these, or they won't be instantiated even if they are unused
-     */
-    private final Autos s_Autos = Autos.getInstance();
     public static Swerve s_Swerve;
     public static Intake s_Intake;
     public static Flywheel s_Flywheel;
@@ -68,7 +62,7 @@ public class RobotContainer {
     /* Button Bindings for Operator */
     private final Trigger bToggleNormalMode = operator.start().and(operator.back());
 
-    private final LoggedDashboardChooser<Command> autoChooser;
+    private final LoggedDashboardChooser<Command> mSysIdSelector;
 
     public void waitForDS() {
 
@@ -86,7 +80,7 @@ public class RobotContainer {
     }
 
     public RobotContainer() {
-//        new Thread(this::waitForDS).start();
+        mSysIdSelector = new LoggedDashboardChooser<>("SysId Choices", AutoBuilder.buildAutoChooser());
 
         switch (Constants.CURRENT_MODE) {
             case REAL -> {
@@ -138,38 +132,37 @@ public class RobotContainer {
         }
 
         configureDefaultCommands();
+        configureSysIdBindings();
         configureTestCommands();
         configureAltBindings();
         configureOperator();
         configureTriggers();
         configureDriver();
+    }
 
-
-        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
+    private void configureSysIdBindings() {
         // Set up SysId routines
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Drive SysId (Quasistatic Forward)",
             s_Swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Drive SysId (Quasistatic Reverse)",
             s_Swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Drive SysId (Dynamic Forward)", s_Swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Drive SysId (Dynamic Reverse)", s_Swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Top Flywheel SysId (Quasistatic Forward)", s_Flywheel.runSysIdQuasistaticTop(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Top Flywheel SysId (Quasistatic Reverse)", s_Flywheel.runSysIdQuasistaticTop(SysIdRoutine.Direction.kReverse));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Bottom Flywheel SysId (Quasistatic Forward)", s_Flywheel.runSysIdQuasistaticBottom(SysIdRoutine.Direction.kForward));
-        autoChooser.addOption(
+        mSysIdSelector.addOption(
             "Bottom Flywheel SysId (Quasistatic Reverse)", s_Flywheel.runSysIdQuasistaticBottom(SysIdRoutine.Direction.kReverse));
     }
 
-    private void configurePathfindingCommands() {
-    }
+    private void configurePathfindingCommands() {}
 
     private void configureTestCommands() {
         /* Sample Test Mode */

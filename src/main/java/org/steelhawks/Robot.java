@@ -105,7 +105,7 @@ public class Robot extends LoggedRobot {
 
         /* Update SmartDashboard every 5 cycles (10 time a second) */
         if (counter % 5 == 0) {
-            SmartDashboard.putString("auton/auton selected", Autos.getInstance().getAutonName());
+            SmartDashboard.putString("auton/auton selected", Autos.getAutonName());
         }
     }
 
@@ -134,7 +134,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        autonomousCommand = Autos.getInstance().getAutonomousCommand();
+        autonomousCommand = Autos.getAutonomousCommand();
 
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
