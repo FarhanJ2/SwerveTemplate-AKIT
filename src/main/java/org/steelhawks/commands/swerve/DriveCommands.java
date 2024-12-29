@@ -118,7 +118,7 @@ public class DriveCommands {
      */
     public static Command rotateToAngle(Pose2d target) {
         // cache with AtomicReference so we can use it in the lambda
-        AtomicReference<Pose2d> validatedTarget = new AtomicReference<>();
+        AtomicReference<Pose2d> validatedTarget = new AtomicReference<>(AllianceFlip.validate(target));
 
         return Commands.run(
             () -> {
@@ -132,12 +132,10 @@ public class DriveCommands {
                             s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
                                 : s_Swerve.getRotation()));
             }, s_Swerve)
-        .until(() -> s_Swerve.getAlignPID().atSetpoint())
-            .beforeStarting(Commands.runOnce(() -> {
-                validatedTarget.set(AllianceFlip.validate(target));
-                getRotationSpeedFromPID(validatedTarget.get()); // reset PID setpoint
-            }))
-            .withTimeout(3)
-                .withName("Rotate to Angle");
+                .until(() -> s_Swerve.getAlignPID().atSetpoint())
+                    .beforeStarting(Commands.runOnce(() ->
+                        getRotationSpeedFromPID(validatedTarget.get()))) // reset PID setpoint
+                            .withTimeout(3)
+                                .withName("Rotate to Angle");
     }
 }
