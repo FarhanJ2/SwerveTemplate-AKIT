@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.Constants.*;
 import org.steelhawks.commands.swerve.DriveCommands;
-import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.*;
 import org.steelhawks.subsystems.flywheel.Flywheel;
 import org.steelhawks.subsystems.flywheel.FlywheelIO;
@@ -60,6 +59,8 @@ public class RobotContainer {
     /* Button Bindings for Operator */
     private final Trigger bToggleNormalMode = operator.start().and(operator.back());
 
+    private boolean mRan = false;
+
     public void waitForDS() {
         boolean isRed =
             DriverStation.getAlliance().isPresent()
@@ -67,12 +68,16 @@ public class RobotContainer {
 
 
         s_LED.setDefaultLighting(s_LED.bounceWaveCommand(isRed ? LED.LEDColor.RED : LED.LEDColor.BLUE));
+
+        if (mRan) return;
+
         /* Does nothing, just gets the library ready */
         PathfindingCommand.warmupCommand()
             .finallyDo(() -> s_Swerve.setPose(!isRed ? Pose.Blue.ORIGIN : Pose.Red.ORIGIN)) // add this to reset to origin as warmup moves robot pose
             .schedule();
 
         configurePathfindingCommands();
+        mRan = true;
     }
 
     public RobotContainer() {
@@ -187,6 +192,9 @@ public class RobotContainer {
 
         driver.rightBumper().whileTrue(
             DriveCommands.rotateToAngle(FieldConstants.BLUE_SPEAKER_POSE));
+
+        driver.x()
+            .onTrue(Commands.runOnce(s_Swerve::stopWithX));
     }
 
     private void configureOperator() {
@@ -199,8 +207,7 @@ public class RobotContainer {
             .onTrue(s_Pivot.toggleManual(operator::getLeftY));
     }
 
-    private void configureTriggers() {
-    }
+    private void configureTriggers() {}
 
     private void configureDefaultCommands() {
         s_Swerve.setDefaultCommand(
