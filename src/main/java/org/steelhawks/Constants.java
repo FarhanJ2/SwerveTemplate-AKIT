@@ -17,7 +17,7 @@ public final class Constants {
     /** Enables whether simulation should play a replay of a real robot log. */
     public static boolean IN_REPLAY_MODE = false;
 
-    /** The CAN loop name on Phoenix Tuner */
+    /** The CAN bus name on Phoenix Tuner */
     public static String CANIVORE_NAME = "canivore";
 
     /**
