@@ -294,6 +294,9 @@ public class Swerve extends SubsystemBase {
         mPoseEstimator.addVisionMeasurement(visionPose, timestamp);
     }
 
+    ///////////////////////
+    /* COMMAND FACTORIES */
+    ///////////////////////
 
     /** Returns a command to run a quasistatic test in the specified direction. */
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -311,5 +314,15 @@ public class Swerve extends SubsystemBase {
             Commands.runOnce(() -> SPEED_MULTIPLIER = 1.0),
             Commands.runOnce(() -> SPEED_MULTIPLIER = KSwerve.SLOW_MODE_MULTIPLIER),
             this::isSlowMode);
+    }
+
+    /** Returns a command to zero the robot's heading. */
+    public Command zeroHeading() {
+        return Commands.runOnce(
+            () ->
+                setPose(
+                    new Pose2d(getPose().getTranslation(), new Rotation2d())),
+                this)
+        .ignoringDisable(true);
     }
 }

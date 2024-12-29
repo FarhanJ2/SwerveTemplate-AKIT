@@ -181,7 +181,7 @@ public class RobotContainer {
     private void configureDriver() {
         bToggleSpeedMultiplier.onTrue(s_Swerve.toggleMultiplier().alongWith(s_LED.flashCommand(s_Swerve.isSlowMode() ? LED.LEDColor.RED : LED.LEDColor.GREEN, .2, 1)));
         bToggleVisionMeasurement.onTrue(Commands.runOnce(() -> addVisionMeasurement = !addVisionMeasurement));
-//        bResetGyro.onTrue(s_Swerve.zeroHeading());
+        bResetGyro.onTrue(s_Swerve.zeroHeading());
 
         driver.leftBumper().whileTrue(s_Flywheel.rampSubwoofer());
 
