@@ -1,16 +1,3 @@
-// Copyright 2021-2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package org.steelhawks.subsystems.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -33,10 +20,7 @@ import java.util.Queue;
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
  * CANcoder
  *
- * <p>NOTE: This implementation should be used as a starting point and adapted to different hardware
- * configurations (e.g. If using an analog encoder, copy from "ModuleIOSparkMax")
- *
- * <p>To calibrate the absolute encoder offsets, point the modules straight (such that forward
+ * <p>NOTE: To calibrate the absolute encoder offsets, point the modules straight (such that forward
  * motion on the drive motor will propel the robot forward) and copy the reported values from the
  * absolute encoders using AdvantageScope. These values are logged under
  * "/Drive/ModuleX/TurnAbsolutePositionRad"
@@ -45,7 +29,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     private final TalonFX driveTalon;
     private final TalonFX turnTalon;
-    private final CANcoder cancoder;
+    private final CANcoder canCoder;
 
     private final Queue<Double> timestampQueue;
 
@@ -74,25 +58,25 @@ public class ModuleIOTalonFX implements ModuleIO {
             case 0:
                 driveTalon = new TalonFX(1, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(2, Constants.CANIVORE_NAME);
-                cancoder = new CANcoder(3, Constants.CANIVORE_NAME);
+                canCoder = new CANcoder(3, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-130.17);
                 break;
             case 1:
                 driveTalon = new TalonFX(4, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(5, Constants.CANIVORE_NAME);
-                cancoder = new CANcoder(6, Constants.CANIVORE_NAME);
+                canCoder = new CANcoder(6, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-51.34);
                 break;
             case 2:
                 driveTalon = new TalonFX(7, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(8, Constants.CANIVORE_NAME);
-                cancoder = new CANcoder(9, Constants.CANIVORE_NAME);
+                canCoder = new CANcoder(9, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-63.9);
                 break;
             case 3:
                 driveTalon = new TalonFX(10, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(11, Constants.CANIVORE_NAME);
-                cancoder = new CANcoder(12, Constants.CANIVORE_NAME);
+                canCoder = new CANcoder(12, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-175.96);
                 break;
             default:
@@ -111,7 +95,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnTalon.getConfigurator().apply(turnConfig);
         setTurnBrakeMode(true);
 
-        cancoder.getConfigurator().apply(new CANcoderConfiguration());
+        canCoder.getConfigurator().apply(new CANcoderConfiguration());
 
         timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
@@ -122,7 +106,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveAppliedVolts = driveTalon.getMotorVoltage();
         driveCurrent = driveTalon.getSupplyCurrent();
 
-        turnAbsolutePosition = cancoder.getAbsolutePosition();
+        turnAbsolutePosition = canCoder.getAbsolutePosition();
         turnPosition = turnTalon.getPosition();
         turnPositionQueue =
             PhoenixOdometryThread.getInstance().registerSignal(turnTalon, turnTalon.getPosition());
