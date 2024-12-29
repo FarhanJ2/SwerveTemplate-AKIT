@@ -91,7 +91,7 @@ public class Flywheel extends SubsystemBase {
     public Command rampSubwoofer() {
         return Commands.runEnd(
             () -> io.setVelocity(1500, topFlywheelFeedforward.calculate(1500), bottomFlywheelFeedforward.calculate(1500)),
-            io::stop
+            this::stop
         );
     }
 

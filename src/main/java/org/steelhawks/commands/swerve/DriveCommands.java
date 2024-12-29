@@ -23,7 +23,6 @@ import org.steelhawks.subsystems.swerve.Swerve;
 public class DriveCommands {
 
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
-    private static final double DEADBAND = 0.3;
 
     // we use offsets because our front of our robot for HawkRider is the Intake not the SHOOTER
     // so we rotate the robot 180/360 degrees to make the front of the robot the shooter depending on the alliance
@@ -77,10 +76,10 @@ public class DriveCommands {
             () -> {
                 double linearMagnitude =
                     MathUtil.applyDeadband(
-                        Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), DEADBAND);
+                        Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), Deadbands.DRIVE_DEADBAND);
                 Rotation2d linearDirection =
                     new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
-                double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+                double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), Deadbands.DRIVE_DEADBAND);
 
                 // Square values
                 linearMagnitude = Math.pow(linearMagnitude, 2);
@@ -107,7 +106,7 @@ public class DriveCommands {
                             s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
                                 : s_Swerve.getRotation()));
             }, s_Swerve)
-            .withName("Teleop Drive");
+                .withName("Teleop Drive");
     }
 
 

@@ -117,6 +117,7 @@ public class Swerve extends SubsystemBase {
         alignPID.setTolerance(1);
     }
 
+    @Override
     public void periodic() {
         odometryLock.lock(); // Prevents odometry updates while reading data
         gyroIO.updateInputs(gyroInputs);
@@ -219,16 +220,6 @@ public class Swerve extends SubsystemBase {
         stop();
     }
 
-    /** Returns a command to run a quasistatic test in the specified direction. */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return sysId.quasistatic(direction);
-    }
-
-    /** Returns a command to run a dynamic test in the specified direction. */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return sysId.dynamic(direction);
-    }
-
     /** Returns the module states (turn angles and drive velocities) for all of the modules. */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
@@ -259,6 +250,35 @@ public class Swerve extends SubsystemBase {
         return getPose().getRotation();
     }
 
+    /** Returns the current gear. Either high or low. */
+    public double getMultiplier() {
+        return SPEED_MULTIPLIER;
+    }
+
+    /** Returns if the robot has capped its speed to low gear. */
+    @AutoLogOutput(key = "Swerve/SlowMode")
+    public boolean isSlowMode() {
+        return SPEED_MULTIPLIER == KSwerve.SLOW_MODE_MULTIPLIER;
+    }
+
+    /** Returns the PID controller used for aligning the robot to a pose. */
+    public PIDController getAlignPID() {
+        return alignPID;
+    }
+
+    /** Returns the calculated angle needed to reach the desired pose. */
+    public double calculateTurnAngle(Pose2d target, double robotAngle) {
+        double tx = target.getX();
+        double ty = target.getY();
+        double rx = getPose().getX();
+        double ry = getPose().getY();
+
+        double requestedAngle = Math.atan((ty - ry) / (tx - rx)) * (180 / Math.PI);
+        double calculatedAngle = (180 - robotAngle + requestedAngle);
+
+        return ((calculatedAngle + 360) % 360);
+    }
+
     /** Resets the current odometry pose. */
     public void setPose(Pose2d pose) {
         mPoseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
@@ -274,36 +294,22 @@ public class Swerve extends SubsystemBase {
         mPoseEstimator.addVisionMeasurement(visionPose, timestamp);
     }
 
-    public double getMultiplier() {
-        return SPEED_MULTIPLIER;
+
+    /** Returns a command to run a quasistatic test in the specified direction. */
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysId.quasistatic(direction);
     }
 
-    public PIDController getAlignPID() {
-        return alignPID;
+    /** Returns a command to run a dynamic test in the specified direction. */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysId.dynamic(direction);
     }
 
-
-    @AutoLogOutput(key = "Swerve/SlowMode")
-    public boolean isSlowMode() {
-        return SPEED_MULTIPLIER == KSwerve.SLOW_MODE_MULTIPLIER;
-    }
-
+    /** Returns a command to toggle the robot's speed multiplier between high and low gear. */
     public Command toggleMultiplier() {
         return Commands.either(
             Commands.runOnce(() -> SPEED_MULTIPLIER = 1.0),
             Commands.runOnce(() -> SPEED_MULTIPLIER = KSwerve.SLOW_MODE_MULTIPLIER),
             this::isSlowMode);
-    }
-
-    public double calculateTurnAngle(Pose2d target, double robotAngle) {
-        double tx = target.getX();
-        double ty = target.getY();
-        double rx = getPose().getX();
-        double ry = getPose().getY();
-
-        double requestedAngle = Math.atan((ty - ry) / (tx - rx)) * (180 / Math.PI);
-        double calculatedAngle = (180 - robotAngle + requestedAngle);
-
-        return ((calculatedAngle + 360) % 360);
     }
 }

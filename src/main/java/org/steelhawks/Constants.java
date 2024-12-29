@@ -70,7 +70,7 @@ public final class Constants {
     }
 
     public static final class Deadbands {
-        public static final double DRIVE_DEADBAND = 0.1;
+        public static final double DRIVE_DEADBAND = 0.3;
     }
 
     public static final class LEDConstants {
