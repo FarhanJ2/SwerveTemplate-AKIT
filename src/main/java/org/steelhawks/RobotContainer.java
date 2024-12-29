@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.Constants.*;
 import org.steelhawks.commands.swerve.DriveCommands;
+import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.*;
 import org.steelhawks.subsystems.flywheel.Flywheel;
 import org.steelhawks.subsystems.flywheel.FlywheelIO;
@@ -183,6 +184,9 @@ public class RobotContainer {
 //        bResetGyro.onTrue(s_Swerve.zeroHeading());
 
         driver.leftBumper().whileTrue(s_Flywheel.rampSubwoofer());
+
+        driver.rightBumper().whileTrue(
+            DriveCommands.rotateToAngle(FieldConstants.BLUE_SPEAKER_POSE));
     }
 
     private void configureOperator() {
@@ -204,6 +208,6 @@ public class RobotContainer {
                 () -> -driver.getLeftY(),
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX(),
-                driver.leftTrigger(.5)).withName("Teleop Drive"));
+                driver.leftTrigger(.5)));
     }
 }

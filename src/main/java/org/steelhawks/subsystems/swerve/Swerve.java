@@ -1,16 +1,3 @@
-// Copyright 2021-2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package org.steelhawks.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -184,6 +171,9 @@ public class Swerve extends SubsystemBase {
 
             // Apply update
             mPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+
+            Logger.recordOutput("Swerve/Current Command",
+                getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
         }
     }
 
@@ -208,11 +198,6 @@ public class Swerve extends SubsystemBase {
         // Log setpoint states
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
         Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
-
-        // Log Align PID
-        Logger.recordOutput("Align/Setpoint", alignPID.getSetpoint());
-//        Logger.recordOutput(
-//            "Align/Output", alignPID.calculate(continuous180To360(getRotation().getDegrees())));
     }
 
     /** Stops the drive. */

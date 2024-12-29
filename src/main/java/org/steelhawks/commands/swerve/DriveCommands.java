@@ -1,16 +1,3 @@
-// Copyright 2021-2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package org.steelhawks.commands.swerve;
 
 import edu.wpi.first.math.MathUtil;
@@ -22,14 +9,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.*;
 
-
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.lib.AllianceFlip;
+import org.steelhawks.lib.HawkMath;
 import org.steelhawks.subsystems.swerve.KSwerve;
 import org.steelhawks.subsystems.swerve.Swerve;
 
@@ -38,28 +25,48 @@ public class DriveCommands {
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
     private static final double DEADBAND = 0.3;
 
+    // we use offsets because our front of our robot for HawkRider is the Intake not the SHOOTER
+    // so we rotate the robot 180/360 degrees to make the front of the robot the shooter depending on the alliance
+    private static final int BLUE_ALLIANCE_OFFSET = 180;
+    private static final int RED_ALLIANCE_OFFSET = 360;
+
     private DriveCommands() {}
 
-    public static double continuous180To360(double angle) {
-        return (angle + 360) % 360;
-    }
-
-    @AutoLogOutput(key = "Swerve/RotationSpeed")
+    /**
+     * Calculates the rotation speed from the PID controller based on the target pose.
+     *
+     * @param target The target pose to rotate to.
+     * @return The calculated rotation speed.
+     */
     private static double getRotationSpeedFromPID(Pose2d target) {
-        double robotHeading = continuous180To360(s_Swerve.getRotation().getDegrees());
+        double robotHeading = HawkMath.continuous180To360(s_Swerve.getRotation().getDegrees());
         double requestedAngle =
             s_Swerve.calculateTurnAngle(
-                target, s_Swerve.getRotation().getDegrees() + (AllianceFlip.shouldFlip() ? 360 : 180));
+                target, s_Swerve.getRotation().getDegrees() + (AllianceFlip.shouldFlip() ?
+                    RED_ALLIANCE_OFFSET
+                        : BLUE_ALLIANCE_OFFSET));
         double setpoint = (robotHeading + requestedAngle) % 360;
 
-        return (s_Swerve.isSlowMode() ? 5 : 1)
+        double rotationSpeed = (s_Swerve.isSlowMode() ? 5 : 1)
             * s_Swerve
             .getAlignPID()
-            .calculate(continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint);
+            .calculate(HawkMath.continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint);
+
+        Logger.recordOutput("Align/RotationSpeed", rotationSpeed);
+        Logger.recordOutput("Align/Robot Heading", robotHeading);
+        Logger.recordOutput("Align/Requested Angle", requestedAngle);
+        Logger.recordOutput("Align/Setpoint", setpoint);
+        return rotationSpeed;
     }
 
     /**
      * Field relative drive command using two joysticks (controlling linear and angular velocities).
+     *
+     * @param xSupplier Supplier for the x-axis input.
+     * @param ySupplier Supplier for the y-axis input.
+     * @param omegaSupplier Supplier for the angular velocity input.
+     * @param alignToSpeaker Trigger to align to the speaker.
+     * @return The command to execute the joystick drive.
      */
     public static Command joystickDrive(
         DoubleSupplier xSupplier,
@@ -76,9 +83,8 @@ public class DriveCommands {
                 double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
                 // Square values
-                linearMagnitude = linearMagnitude * linearMagnitude;
                 linearMagnitude = Math.pow(linearMagnitude, 2);
-                omega = Math.copySign(omega * omega, omega);
+                omega = Math.copySign(Math.pow(omega, 2), omega);
 
                 if (alignToSpeaker.getAsBoolean()) {
                     Pose2d speaker = AllianceFlip.validate(FieldConstants.BLUE_SPEAKER_POSE);
@@ -100,25 +106,39 @@ public class DriveCommands {
                         AllianceFlip.shouldFlip() ?
                             s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
                                 : s_Swerve.getRotation()));
-            }, s_Swerve);
+            }, s_Swerve)
+            .withName("Teleop Drive");
     }
 
 
-    public static Command rotateToAngle(DoubleSupplier requestedAngle) {
-
-        double robotHeading = continuous180To360(s_Swerve.getRotation().getDegrees());
-        double setpoint = (robotHeading + requestedAngle.getAsDouble()) % 360;
+    /**
+     * Command to rotate to a specific angle.
+     *
+     * @param target The target angle to rotate to. Make sure this is a blue alliance pose if you want it to be flipped correctly.
+     * @return The command to rotate to the target angle.
+     */
+    public static Command rotateToAngle(Pose2d target) {
+        // cache with AtomicReference so we can use it in the lambda
+        AtomicReference<Pose2d> validatedTarget = new AtomicReference<>();
 
         return Commands.run(
-            () ->
+            () -> {
+                double rotationSpeed = getRotationSpeedFromPID(validatedTarget.get());
+
                 s_Swerve.runVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                         0, 0,
-                        (s_Swerve.isSlowMode()) ? 5 : 1
-                            * s_Swerve.getAlignPID().calculate(continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint),
+                        (rotationSpeed * KSwerve.MAX_ANGULAR_SPEED) * s_Swerve.getMultiplier(),
                         AllianceFlip.shouldFlip() ?
                             s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
-                            : s_Swerve.getRotation())), s_Swerve)
-                                .until(() -> RobotContainer.s_Swerve.getAlignPID().atSetpoint());
+                                : s_Swerve.getRotation()));
+            }, s_Swerve)
+        .until(() -> s_Swerve.getAlignPID().atSetpoint())
+            .beforeStarting(Commands.runOnce(() -> {
+                validatedTarget.set(AllianceFlip.validate(target));
+                getRotationSpeedFromPID(validatedTarget.get()); // reset PID setpoint
+            }))
+            .withTimeout(3)
+                .withName("Rotate to Angle");
     }
 }
