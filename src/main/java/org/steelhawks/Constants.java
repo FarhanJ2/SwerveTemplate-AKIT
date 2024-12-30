@@ -4,8 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public final class Constants {
@@ -46,25 +44,23 @@ public final class Constants {
 
     /** Auton Selector DIO Ports */
     public static final class SelectorConstants {
-        public static final int AUTON_PORT_1 = 28;
-        public static final int AUTON_PORT_2 = 29;
-        public static final int AUTON_PORT_3 = 30;
-    }
-
-    public static final class Pose {
-        public static final class Red {
-            public static final Pose2d ORIGIN = new Pose2d(new Translation2d(16.542, 8.014), new Rotation2d(Math.PI));
-        }
-
-        public static final class Blue {
-            public static final Pose2d ORIGIN = new Pose2d(new Translation2d(0, 0), new Rotation2d());
-        }
+        public static final int PORT_01 = 28;
+        public static final int PORT_02 = 29;
+        public static final int PORT_03 = 30;
     }
 
     public static final class FieldConstants {
         public static final double FIELD_LENGTH = Units.inchesToMeters(651.223);
         public static final double FIELD_WIDTH = Units.inchesToMeters(323.277);
 
+
+        public static final Pose2d BLUE_ORIGIN = new Pose2d(new Translation2d(0, 0), new Rotation2d());
+        public static final Pose2d RED_ORIGIN = new Pose2d(new Translation2d(16.542, 8.014), new Rotation2d(Math.PI));
+
+        /*
+         * To properly use the auto flip feature, the poses MUST be for the blue alliance.
+         * The auto flip feature will automatically flip the poses for the red alliance.
+         */
         public static final Pose2d BLUE_SPEAKER_POSE =
             new Pose2d(new Translation2d(0, 5.671689), new Rotation2d());
     }
@@ -84,12 +80,12 @@ public final class Constants {
         public static final String limelightArm = "limelight-arm";
 
         // Tracking constants
-        public static final double minAreaOfTag = .1;
-        public static final double maxVisionPoseError = 0.5;
+        public static final double MIN_AREA_OF_TAG = .1;
+        public static final double MAX_VISION_POSE_ERROR = 0.5;
 
         // Pipeline IDS
-        public static final int limelightShooterTagPipeline = 0;
-        public static final int limelightArmTagPipeline = 0;
+        public static final int LIMELIGHT_SHOOTER_TAG_PIPELINE = 0;
+        public static final int LIMELIGHT_ARM_TAG_PIPELINE = 0;
     }
 
     /** Vision Estimates for Odometry Config */

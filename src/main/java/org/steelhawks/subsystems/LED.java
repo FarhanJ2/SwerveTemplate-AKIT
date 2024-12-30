@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
-import org.steelhawks.Constants;
+import org.steelhawks.Constants.*;
 
 public class LED extends SubsystemBase {
 
@@ -40,6 +40,8 @@ public class LED extends SubsystemBase {
         WHITE(255, 255, 255),
         CYAN(0, 255, 255),
         ORANGE(252, 144, 3),
+        HOT_PINK(255, 105, 180),
+        PINK(255, 20, 147),
         OFF(0, 0, 0);
 
         public final int r;
@@ -53,24 +55,17 @@ public class LED extends SubsystemBase {
         }
     }
 
-    public enum LEDMode {
-        STATIC,
-        WAVE,
-        RAINBOW,
-        PULSE;
-    }
-
     public enum FadeDirection {
         IN,
-        OUT;
+        OUT
     }
 
     public enum BounceWaveDirection {
         FORWARD,
-        BACKWARD;
+        BACKWARD
     }
 
-    private final static LED INSTANCE = new LED(Constants.LEDConstants.LED_PORT, Constants.LEDConstants.LED_STRIP_LENGTH);
+    private final static LED INSTANCE = new LED(LEDConstants.LED_PORT, LEDConstants.LED_STRIP_LENGTH);
 
     public static LED getInstance() {
         return INSTANCE;

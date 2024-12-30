@@ -73,7 +73,7 @@ public class RobotContainer {
 
         /* Does nothing, just gets the library ready */
         PathfindingCommand.warmupCommand()
-            .finallyDo(() -> s_Swerve.setPose(!isRed ? Pose.Blue.ORIGIN : Pose.Red.ORIGIN)) // add this to reset to origin as warmup moves robot pose
+            .finallyDo(() -> s_Swerve.setPose(isRed ? FieldConstants.RED_ORIGIN : FieldConstants.BLUE_ORIGIN)) // add this to reset to origin as warmup moves robot pose
             .schedule();
 
         configurePathfindingCommands();
@@ -112,7 +112,6 @@ public class RobotContainer {
                 s_Pivot =
                     new Pivot(new PivotIOSim());
             }
-
             default -> {
                 s_Swerve =
                     new Swerve(

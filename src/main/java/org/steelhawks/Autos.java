@@ -18,9 +18,9 @@ public final class Autos {
 
     /* Change to the amount of autons we have */
     private static final DigitalInput[] mAutonSelector = {
-        new DigitalInput(SelectorConstants.AUTON_PORT_1),
-        new DigitalInput(SelectorConstants.AUTON_PORT_2),
-        new DigitalInput(SelectorConstants.AUTON_PORT_3),
+        new DigitalInput(SelectorConstants.PORT_01),
+        new DigitalInput(SelectorConstants.PORT_02),
+        new DigitalInput(SelectorConstants.PORT_03),
     };
 
     static {

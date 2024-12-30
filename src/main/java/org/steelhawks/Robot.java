@@ -87,12 +87,6 @@ public class Robot extends LoggedRobot {
         if (Constants.TUNING_MODE) {
             new Alert("Tuning Mode Enabled", AlertType.WARNING);
         }
-
-        /* Pathfinding Logging */
-        PathPlannerLogging.setLogActivePathCallback((activePath) ->
-            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
-        PathPlannerLogging.setLogTargetPoseCallback((targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
-        Pathfinding.setPathfinder(new LocalADStarAK());
     }
 
     int counter = 0;

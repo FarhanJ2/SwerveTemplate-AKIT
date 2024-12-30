@@ -9,14 +9,13 @@ import java.util.ArrayList;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.littletonrobotics.junction.Logger;
 
 public class Limelight {
 
-
     private boolean isFlashing = false;
-    /** Creates a new Limelight. */
-    private String limelightName;
-    private static ArrayList<Limelight> limelightArray = new ArrayList<>();
+    private final String limelightName;
+    private static final ArrayList<Limelight> limelightArray = new ArrayList<>();
 
     public Limelight(String limelightName) {
         this.limelightName = limelightName;
@@ -24,10 +23,10 @@ public class Limelight {
 
     }
 
-    // //For debugging and startup purposes
+    /** For debugging and startup purposes */
     public void flashLimelight() {
 
-        if(isFlashing) return;
+        if (isFlashing) return;
 
         new Thread(() -> {
             isFlashing = true;
@@ -76,26 +75,26 @@ public class Limelight {
 
     public int getNumberOfTagsInView() {
         return LimelightHelpers.getLatestResults(this.limelightName).targets_Fiducials.length;
-        // this was return LimelightHelpers.getLatestResults(this.limelightName).targetingResults.targets_Fiducials.length;
     }
 
     public Pose2d getVisionPredictedRobotPose() {
-        //   LimelightHelpers.getLatestResults(this.limelightName);
         if (LimelightHelpers.getTV(this.limelightName)) {
             return LimelightHelpers.getBotPose2d_wpiBlue(this.limelightName);
         }
 
         return null;
-
-
     }
 
-    public void periodic() {
-        // This method will be called once per scheduler run
-        SmartDashboard.putNumber(this.limelightName + " Number of Tags in View", this.getNumberOfTagsInView());
-        SmartDashboard.putNumber(this.limelightName + " Latency", this.getLimelightLatency());
-        SmartDashboard.putNumber(this.limelightName + " current pipeline", this.getPipeline());
-        SmartDashboard.putString("Limelights in Use", getLimelightsInUse().toString());
 
+    int counter = 0;
+    public void log() {
+        counter = (counter + 1) % 1000;
+
+        if (counter % 5 == 0) {
+            Logger.recordOutput("Vision/" + limelightName + " Number of Tags in View", getNumberOfTagsInView());
+            Logger.recordOutput("Vision/" + limelightName + " Latency", getLimelightLatency());
+            Logger.recordOutput("Vision/" + limelightName + " Current Pipeline", getPipeline());
+            Logger.recordOutput("Vision/Limelights in Use", getLimelightsInUse().toString());
+        }
     }
 }

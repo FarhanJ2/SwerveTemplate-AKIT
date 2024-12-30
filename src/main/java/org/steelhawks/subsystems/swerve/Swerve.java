@@ -3,6 +3,7 @@ package org.steelhawks.subsystems.swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.controller.PIDController;
@@ -24,6 +25,8 @@ import org.steelhawks.Constants;
 import org.steelhawks.lib.LocalADStarAK;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.steelhawks.lib.OdometryImpl;
+import org.steelhawks.Constants.*;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -67,6 +70,7 @@ public class Swerve extends SubsystemBase {
 
         // Start threads (no-op for each if no signals have been created)
         PhoenixOdometryThread.getInstance().start();
+        OdometryImpl.setPoseEstimator(mPoseEstimator);
 
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configureHolonomic(
@@ -75,21 +79,29 @@ public class Swerve extends SubsystemBase {
             () -> KSwerve.SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates()),
             this::runVelocity,
             new HolonomicPathFollowerConfig(
+                new PIDConstants(
+                    AutonConstants.TRANSLATION_KP,
+                    AutonConstants.TRANSLATION_KI,
+                    AutonConstants.TRANSLATION_KD
+                ),
+                new PIDConstants(
+                    AutonConstants.ROTATION_KP,
+                    AutonConstants.ROTATION_KI,
+                    AutonConstants.ROTATION_KD
+                ),
                 KSwerve.MAX_LINEAR_SPEED, KSwerve.DRIVE_BASE_RADIUS, new ReplanningConfig()),
             () ->
                 DriverStation.getAlliance().isPresent()
                     && DriverStation.getAlliance().get() == Alliance.Red,
             this);
+
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
-            (activePath) -> {
+            (activePath) ->
                 Logger.recordOutput(
-                    "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-            });
+                    "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()])));
         PathPlannerLogging.setLogTargetPoseCallback(
-            (targetPose) -> {
-                Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-            });
+            (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
 
         sysId =
             new SysIdRoutine(
