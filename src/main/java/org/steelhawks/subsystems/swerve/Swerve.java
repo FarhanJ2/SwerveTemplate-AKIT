@@ -186,6 +186,8 @@ public class Swerve extends SubsystemBase {
 
             Logger.recordOutput("Swerve/Current Command",
                 getCurrentCommand() != null ? getCurrentCommand().getName() : "None");
+
+            Logger.recordOutput("Swerve/Is Pathfinding", isPathfinding);
         }
     }
 

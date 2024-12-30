@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public final class Constants {
@@ -122,5 +123,17 @@ public final class Constants {
                 MAX_ACCELERATION_METERS_PER_SECOND_SQUARED,
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
+    }
+
+    public static final class NotePose {
+        public static final Pose2d NOTE_01 = new Pose2d(new Translation2d(2.892797, 6.954784), new Rotation2d());
+        public static final Pose2d NOTE_02 = new Pose2d(new Translation2d(2.892797, 5.524863), new Rotation2d());
+        public static final Pose2d NOTE_03 = new Pose2d(new Translation2d(2.817538, 4.195287), new Rotation2d());
+
+        public static final Pose2d FAR_NOTE_01 = new Pose2d(new Translation2d(8.286359, 7.431425), new Rotation2d());
+        public static final Pose2d FAR_NOTE_02 = new Pose2d(new Translation2d(8.286359, 5.775726), new Rotation2d());
+        public static final Pose2d FAR_NOTE_03 = new Pose2d(new Translation2d(8.286359, 4.120028), new Rotation2d());
+        public static final Pose2d FAR_NOTE_04 = new Pose2d(new Translation2d(8.286359, 2.414157), new Rotation2d());
+        public static final Pose2d FAR_NOTE_05 = new Pose2d(new Translation2d(8.286359, 0.758459), new Rotation2d());
     }
 }

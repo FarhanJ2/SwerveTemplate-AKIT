@@ -7,8 +7,11 @@ package org.steelhawks;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -17,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.steelhawks.Constants.*;
 import org.steelhawks.commands.swerve.DriveCommands;
+import org.steelhawks.lib.AllianceFlip;
 import org.steelhawks.subsystems.*;
 import org.steelhawks.subsystems.flywheel.Flywheel;
 import org.steelhawks.subsystems.flywheel.FlywheelIO;
@@ -165,6 +169,8 @@ public class RobotContainer {
 
     private void configurePathfindingCommands() {}
 
+    SendableChooser<Pose2d> chooser = new SendableChooser<>();
+
     private void configureTestCommands() {
         /* Sample Test Mode */
         driver.leftStick()
@@ -177,6 +183,20 @@ public class RobotContainer {
                     Commands.print("Testing Elevator"),
                     Commands.print("Done Testing!")
                 ).withName("Pit Test"));
+
+
+
+        chooser.addOption("Speaker", AllianceFlip.validate(FieldConstants.BLUE_SPEAKER_POSE));
+        chooser.addOption("NOTE 1", AllianceFlip.validate(NotePose.NOTE_01));
+        chooser.addOption("NOTE 2", AllianceFlip.validate(NotePose.NOTE_02));
+        chooser.addOption("NOTE 3", AllianceFlip.validate(NotePose.NOTE_03));
+        chooser.addOption("FAR NOTE 1", AllianceFlip.validate(NotePose.FAR_NOTE_01));
+        chooser.addOption("FAR NOTE 2", AllianceFlip.validate(NotePose.FAR_NOTE_02));
+        chooser.addOption("FAR NOTE 3", AllianceFlip.validate(NotePose.FAR_NOTE_03));
+        chooser.addOption("FAR NOTE 4", AllianceFlip.validate(NotePose.FAR_NOTE_04));
+        chooser.addOption("FAR NOTE 5", AllianceFlip.validate(NotePose.FAR_NOTE_05));
+
+        SmartDashboard.putData(chooser);
     }
 
     private void configureAltBindings() {}
@@ -187,13 +207,20 @@ public class RobotContainer {
         bToggleVisionMeasurement.onTrue(Commands.runOnce(() -> addVisionMeasurement = !addVisionMeasurement));
         bResetGyro.onTrue(s_Swerve.zeroHeading());
 
-        driver.leftBumper().whileTrue(s_Flywheel.rampSubwoofer());
+//        driver.leftBumper().whileTrue(s_Flywheel.rampSubwoofer());
 
         driver.rightBumper().whileTrue(
             DriveCommands.rotateToAngle(FieldConstants.BLUE_SPEAKER_POSE));
 
         driver.x()
             .onTrue(Commands.runOnce(s_Swerve::stopWithX));
+
+        driver.leftBumper()
+            .onTrue(
+                DriveCommands.driveToPosition(
+                    chooser.getSelected() != null
+                        ? chooser.getSelected()
+                            : new Pose2d()));
     }
 
     private void configureOperator() {

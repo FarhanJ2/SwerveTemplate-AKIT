@@ -14,6 +14,7 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Go to Team Speaker": "Command",
+      "/SmartDashboard/SendableChooser[0]": "String Chooser",
       "/SmartDashboard/SysID Routine": "Command",
       "/SmartDashboard/SysId Choices": "String Chooser",
       "/SmartDashboard/swerve/field": "Field2d"
