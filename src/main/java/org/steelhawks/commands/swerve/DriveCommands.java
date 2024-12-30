@@ -3,6 +3,7 @@ package org.steelhawks.commands.swerve;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -13,8 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.*;
-
-import java.util.concurrent.atomic.AtomicReference;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.steelhawks.RobotContainer;
@@ -25,6 +25,7 @@ import org.steelhawks.subsystems.swerve.Swerve;
 
 public class DriveCommands {
 
+    private static final Debouncer mPidDebouncer = new Debouncer(0.1, DebounceType.kRising);
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
 
     // we use offsets because our front of our robot for HawkRider is the Intake not the SHOOTER
@@ -120,11 +121,12 @@ public class DriveCommands {
      */
     public static Command rotateToAngle(Pose2d target) {
         // cache with AtomicReference so we can use it in the lambda
-        AtomicReference<Pose2d> validatedTarget = new AtomicReference<>(AllianceFlip.validate(target));
+//        AtomicReference<Pose2d> validatedTarget = new AtomicReference<>(AllianceFlip.validate(target));
 
         return Commands.run(
             () -> {
-                double rotationSpeed = getRotationSpeedFromPID(validatedTarget.get());
+                Pose2d validatedTarget = AllianceFlip.validate(target);
+                double rotationSpeed = getRotationSpeedFromPID(validatedTarget);
 
                 s_Swerve.runVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -134,9 +136,9 @@ public class DriveCommands {
                             s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
                                 : s_Swerve.getRotation()));
             }, s_Swerve)
-                .until(() -> s_Swerve.getAlignPID().atSetpoint())
+                .until(() -> mPidDebouncer.calculate(s_Swerve.getAlignPID().atSetpoint()))
                     .beforeStarting(Commands.runOnce(() ->
-                        getRotationSpeedFromPID(validatedTarget.get()))) // reset PID setpoint
+                        getRotationSpeedFromPID(new Pose2d())))// reset PID setpoint
                             .withTimeout(3)
                                 .withName("Rotate to Angle");
     }
