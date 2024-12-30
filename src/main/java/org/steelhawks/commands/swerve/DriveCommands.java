@@ -15,6 +15,7 @@ import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants.*;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.lib.AllianceFlip;
@@ -97,16 +98,6 @@ public class DriveCommands {
                         .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
                         .getTranslation();
 
-                if (s_Swerve.isPathfinding) {
-                    linearVelocity = new Translation2d();
-                    omega = 0;
-
-                    /* KILL SWITCH FOR PATHFINDING IF DRIVER MOVES ANY JOYSTICK */
-                    if (Math.abs(xSupplier.getAsDouble()) > 0.1 || Math.abs(ySupplier.getAsDouble()) > 0.1) {
-                        s_Swerve.isPathfinding = false;
-                    }
-                }
-
                 s_Swerve.runVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                         (linearVelocity.getX() * KSwerve.MAX_LINEAR_SPEED)
@@ -120,7 +111,6 @@ public class DriveCommands {
             }, s_Swerve)
                 .withName("Teleop Drive");
     }
-
 
     /**
      * Command to rotate to a specific angle.
@@ -151,21 +141,26 @@ public class DriveCommands {
                                 .withName("Rotate to Angle");
     }
 
-    public static Command driveToPosition(Pose2d target) {
+    public static Command driveToPosition(Pose2d target, BooleanSupplier emergencyStop) {
         return AutoBuilder.pathfindToPose(target, AutonConstants.CONSTRAINTS)
-            .onlyWhile(() -> s_Swerve.isPathfinding)
+            .onlyWhile(() -> s_Swerve.shouldContinuePathfinding(emergencyStop))
                 .beforeStarting(
                     () -> s_Swerve.isPathfinding = true)
                         .finallyDo(() -> s_Swerve.isPathfinding = false)
                             .withName("Drive to Position");
     }
 
-    public static Command driveToPath(PathPlannerPath path) {
+    public static Command driveToPath(PathPlannerPath path, BooleanSupplier emergencyStop) {
         return AutoBuilder.pathfindThenFollowPath(path, AutonConstants.CONSTRAINTS)
-            .onlyWhile(() -> s_Swerve.isPathfinding)
+            .onlyWhile(() -> s_Swerve.shouldContinuePathfinding(emergencyStop))
                 .beforeStarting(
                     () -> s_Swerve.isPathfinding = true)
                         .finallyDo(() -> s_Swerve.isPathfinding = false)
                             .withName("Drive to Path");
+    }
+
+    public static Command followPath(PathPlannerPath path) {
+        return AutoBuilder.followPath(path)
+            .withName("Follow Path");
     }
 }

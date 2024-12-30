@@ -111,10 +111,10 @@ public final class Constants {
         public static final double ROTATION_KI = 0.0;
         public static final double ROTATION_KD = 0.0;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 1.0;
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1.0;
-        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 1.0;
-        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 1.0;
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 4.0;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 4.0;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 8.0;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 10.0;
 
         public static final PathConstraints CONSTRAINTS =
             new PathConstraints(
@@ -133,6 +133,6 @@ public final class Constants {
         public static final Pose2d FAR_NOTE_02 = new Pose2d(new Translation2d(8.286359, 5.775726), new Rotation2d());
         public static final Pose2d FAR_NOTE_03 = new Pose2d(new Translation2d(8.286359, 4.120028), new Rotation2d());
         public static final Pose2d FAR_NOTE_04 = new Pose2d(new Translation2d(8.286359, 2.414157), new Rotation2d());
-        public static final Pose2d FAR_NOTE_05 = new Pose2d(new Translation2d(8.286359, 0.758459), new Rotation2d());
+        public static final Pose2d FAR_NOTE_05 = new Pose2d(new Translation2d(8.286359, 0.758459), new Rotation2d(Math.PI));
     }
 }

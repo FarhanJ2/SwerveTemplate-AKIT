@@ -196,6 +196,8 @@ public class RobotContainer {
         chooser.addOption("FAR NOTE 4", AllianceFlip.validate(NotePose.FAR_NOTE_04));
         chooser.addOption("FAR NOTE 5", AllianceFlip.validate(NotePose.FAR_NOTE_05));
 
+        chooser.setDefaultOption("FAR NOTE 5", AllianceFlip.validate(NotePose.FAR_NOTE_05));
+
         SmartDashboard.putData(chooser);
     }
 
@@ -218,9 +220,11 @@ public class RobotContainer {
         driver.leftBumper()
             .onTrue(
                 DriveCommands.driveToPosition(
-                    chooser.getSelected() != null
-                        ? chooser.getSelected()
-                            : new Pose2d()));
+                    chooser.getSelected() != null ?
+                        chooser.getSelected() : new Pose2d(),
+                            () -> Math.abs(driver.getLeftY()
+                                + driver.getLeftX()
+                                    + driver.getRightX()) > 0.1));
     }
 
     private void configureOperator() {

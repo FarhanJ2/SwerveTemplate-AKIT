@@ -91,13 +91,13 @@ public class Pivot extends SubsystemBase {
     }
 
 
-    public Command toggleManual(DoubleSupplier operator) {
+    public Command toggleManual(DoubleSupplier leftYAxis) {
         return Commands.either(
             Commands.runOnce(() -> {
                 mPivotLock = OperatorLock.LOCKED;
                 disable();
                 setDefault(
-                    runPivotManual(operator)
+                    runPivotManual(leftYAxis)
                 );
             }),
             Commands.runOnce(() -> {

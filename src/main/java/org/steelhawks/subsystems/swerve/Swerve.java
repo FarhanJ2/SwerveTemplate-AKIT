@@ -1,6 +1,7 @@
 package org.steelhawks.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.steelhawks.Constants;
+import org.steelhawks.commands.swerve.DriveCommands;
 import org.steelhawks.lib.LocalADStarAK;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -30,6 +32,7 @@ import org.steelhawks.Constants.*;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 
 import static edu.wpi.first.units.Units.Volts;
 
@@ -270,6 +273,14 @@ public class Swerve extends SubsystemBase {
     @AutoLogOutput(key = "Swerve/SlowMode")
     public boolean isSlowMode() {
         return SPEED_MULTIPLIER == KSwerve.SLOW_MODE_MULTIPLIER;
+    }
+
+    /**
+     * Returns true if the robot should continue pathfinding, false if interrupted by driver.
+     */
+    public boolean shouldContinuePathfinding(BooleanSupplier stopCondition) {
+        Logger.recordOutput("Swerve/ShouldInterruptPathfinding", stopCondition.getAsBoolean());
+        return !stopCondition.getAsBoolean();
     }
 
     /** Returns the PID controller used for aligning the robot to a pose. */
