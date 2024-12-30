@@ -1,5 +1,6 @@
 package org.steelhawks;
 
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -109,5 +110,17 @@ public final class Constants {
         public static final double ROTATION_KP = 0.0;
         public static final double ROTATION_KI = 0.0;
         public static final double ROTATION_KD = 0.0;
+
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 1.0;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1.0;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 1.0;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 1.0;
+
+        public static final PathConstraints CONSTRAINTS =
+            new PathConstraints(
+                MAX_VELOCITY_METERS_PER_SECOND,
+                MAX_ACCELERATION_METERS_PER_SECOND_SQUARED,
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
     }
 }

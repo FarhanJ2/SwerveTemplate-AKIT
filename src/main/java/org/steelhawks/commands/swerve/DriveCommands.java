@@ -1,5 +1,7 @@
 package org.steelhawks.commands.swerve;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -95,6 +97,16 @@ public class DriveCommands {
                         .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
                         .getTranslation();
 
+                if (s_Swerve.isPathfinding) {
+                    linearVelocity = new Translation2d();
+                    omega = 0;
+
+                    /* KILL SWITCH FOR PATHFINDING IF DRIVER MOVES ANY JOYSTICK */
+                    if (Math.abs(xSupplier.getAsDouble()) > 0.1 || Math.abs(ySupplier.getAsDouble()) > 0.1) {
+                        s_Swerve.isPathfinding = false;
+                    }
+                }
+
                 s_Swerve.runVelocity(
                     ChassisSpeeds.fromFieldRelativeSpeeds(
                         (linearVelocity.getX() * KSwerve.MAX_LINEAR_SPEED)
@@ -137,5 +149,23 @@ public class DriveCommands {
                         getRotationSpeedFromPID(validatedTarget.get()))) // reset PID setpoint
                             .withTimeout(3)
                                 .withName("Rotate to Angle");
+    }
+
+    public static Command driveToPosition(Pose2d target) {
+        return AutoBuilder.pathfindToPose(target, AutonConstants.CONSTRAINTS)
+            .onlyWhile(() -> s_Swerve.isPathfinding)
+                .beforeStarting(
+                    () -> s_Swerve.isPathfinding = true)
+                        .finallyDo(() -> s_Swerve.isPathfinding = false)
+                            .withName("Drive to Position");
+    }
+
+    public static Command driveToPath(PathPlannerPath path) {
+        return AutoBuilder.pathfindThenFollowPath(path, AutonConstants.CONSTRAINTS)
+            .onlyWhile(() -> s_Swerve.isPathfinding)
+                .beforeStarting(
+                    () -> s_Swerve.isPathfinding = true)
+                        .finallyDo(() -> s_Swerve.isPathfinding = false)
+                            .withName("Drive to Path");
     }
 }

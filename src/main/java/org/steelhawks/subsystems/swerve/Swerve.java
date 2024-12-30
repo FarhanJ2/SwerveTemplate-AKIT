@@ -36,7 +36,7 @@ import static edu.wpi.first.units.Units.Volts;
 public class Swerve extends SubsystemBase {
     private static double SPEED_MULTIPLIER = 1.0;
 
-    static final Lock odometryLock = new ReentrantLock();
+    public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final SwerveModule[] modules = new SwerveModule[4]; // FL, FR, BL, BR
@@ -52,8 +52,10 @@ public class Swerve extends SubsystemBase {
             new SwerveModulePosition()
         };
 
-    public final SwerveDrivePoseEstimator mPoseEstimator =
+    private final SwerveDrivePoseEstimator mPoseEstimator =
         new SwerveDrivePoseEstimator(KSwerve.SWERVE_KINEMATICS, rawGyroRotation, lastModulePositions, new Pose2d());
+
+    public boolean isPathfinding = false;
 
     public Swerve(
         GyroIO gyroIO,
@@ -172,17 +174,14 @@ public class Swerve extends SubsystemBase {
                 lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
             }
 
-            // Update gyro angle
+            // If Pigeon2 is connected use real Gyro data else use kinematics
             if (gyroInputs.connected) {
-                // Use the real gyro angle
                 rawGyroRotation = gyroInputs.odometryYawPositions[i];
             } else {
-                // Use the angle delta from the kinematics and module deltas
                 Twist2d twist = KSwerve.SWERVE_KINEMATICS.toTwist2d(moduleDeltas);
                 rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
             }
 
-            // Apply update
             mPoseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
 
             Logger.recordOutput("Swerve/Current Command",
@@ -196,19 +195,16 @@ public class Swerve extends SubsystemBase {
      * @param speeds Speeds in meters/sec
      */
     public void runVelocity(ChassisSpeeds speeds) {
-        // Calculate module setpoints
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = KSwerve.SWERVE_KINEMATICS.toSwerveModuleStates(discreteSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, KSwerve.MAX_LINEAR_SPEED);
 
-        // Send setpoints to modules
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
-            // The module returns the optimized state, useful for logging
+            // the module returns the optimized state used for logging
             optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
         }
 
-        // Log setpoint states
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
         Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
     }
@@ -233,7 +229,7 @@ public class Swerve extends SubsystemBase {
     }
 
     /** Returns the module states (turn angles and drive velocities) for all of the modules. */
-    @AutoLogOutput(key = "SwerveStates/Measured")
+    @AutoLogOutput(key = "SwerveStates/Velocities")
     private SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
@@ -243,6 +239,7 @@ public class Swerve extends SubsystemBase {
     }
 
     /** Returns the module positions (turn angles and drive positions) for all of the modules. */
+    @AutoLogOutput(key = "SwerveStates/Positions")
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {

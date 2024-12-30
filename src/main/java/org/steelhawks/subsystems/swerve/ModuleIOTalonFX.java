@@ -97,7 +97,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         canCoder.getConfigurator().apply(new CANcoderConfiguration());
 
-        timestampQueue = PhoenixOdomeotryThread.getInstance().makeTimestampQueue();
+        timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
 
         drivePosition = driveTalon.getPosition();
         drivePositionQueue =
