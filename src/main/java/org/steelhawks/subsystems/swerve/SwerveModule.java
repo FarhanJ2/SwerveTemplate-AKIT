@@ -13,7 +13,7 @@ import org.steelhawks.Constants;
 public class SwerveModule {
 
     private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
-    static final double ODOMETRY_FREQUENCY = 250.0;
+    public static final double ODOMETRY_FREQUENCY = 250.0;
 
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
@@ -41,9 +41,9 @@ public class SwerveModule {
                 turnFeedback = new PIDController(KSwerve.TURN_KP, KSwerve.TURN_KI, KSwerve.TURN_KD);
                 break;
             case SIM:
-                driveFeedforward = new SimpleMotorFeedforward(0.0, 0.13);
-                driveFeedback = new PIDController(0.1, 0.0, 0.0);
-                turnFeedback = new PIDController(10.0, 0.0, 0.0);
+                driveFeedforward = new SimpleMotorFeedforward(KSwerve.DRIVE_KS_SIM, KSwerve.DRIVE_KV_SIM);
+                driveFeedback = new PIDController(KSwerve.DRIVE_KP_SIM, KSwerve.DRIVE_KI_SIM, KSwerve.DRIVE_KD_SIM);
+                turnFeedback = new PIDController(KSwerve.TURN_KP_SIM, KSwerve.TURN_KI_SIM, KSwerve.TURN_KD_SIM);
                 break;
             default:
                 driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);

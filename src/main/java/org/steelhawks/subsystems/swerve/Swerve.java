@@ -125,8 +125,8 @@ public class Swerve extends SubsystemBase {
                     this));
 
         switch (Constants.CURRENT_MODE) {
-            case REPLAY, REAL -> alignPID = new PIDController(0.07, 0, 0); // TEST
-            case SIM -> alignPID = new PIDController(0.02, 0, 0);
+            case REPLAY, REAL -> alignPID = new PIDController(KSwerve.AUTO_ALIGN_KP, KSwerve.AUTO_ALIGN_KI, KSwerve.AUTO_ALIGN_KD); // TEST
+            case SIM -> alignPID = new PIDController(KSwerve.AUTO_ALIGN_KP_SIM, KSwerve.AUTO_ALIGN_KI_SIM, KSwerve.AUTO_ALIGN_KD_SIM);
             default -> alignPID = new PIDController(0, 0, 0);
         }
 

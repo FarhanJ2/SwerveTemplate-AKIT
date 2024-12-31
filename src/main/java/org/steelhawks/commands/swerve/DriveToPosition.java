@@ -2,6 +2,7 @@ package org.steelhawks.commands.swerve;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotContainer;
@@ -24,7 +25,8 @@ public class DriveToPosition extends Command {
     public DriveToPosition(Pose2d target) {
         mTarget = target;
 
-        mAlignController.setTolerance(1);
+        mXPositionController.setTolerance(3);
+        mYPositionController.setTolerance(3);
 
         addRequirements(RobotContainer.s_Swerve);
     }
@@ -46,6 +48,15 @@ public class DriveToPosition extends Command {
 //            mAlignController.calculate(continuous180To360(mTarget.getRotation().getDegrees())),
 //            true, false
 //        );
+
+        RobotContainer.s_Swerve.runVelocity(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                mXPositionController.calculate(RobotContainer.s_Swerve.getPose().getX()),
+                mYPositionController.calculate(RobotContainer.s_Swerve.getPose().getY()),
+                mAlignController.calculate(continuous180To360(mTarget.getRotation().getDegrees())),
+                RobotContainer.s_Swerve.getRotation()
+            )
+        );
     }
 
     @Override

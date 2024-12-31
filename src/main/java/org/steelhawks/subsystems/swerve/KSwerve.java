@@ -74,14 +74,35 @@ public final class KSwerve {
     public static final double DRIVE_KI = 0.0;
     public static final double DRIVE_KD = 0.0;
 
-    public static final double TURN_KP = 7.0;
+    public static final double TURN_KP = 7.0; // this might be 100 check with your robot
     public static final double TURN_KI = 0.0;
     public static final double TURN_KD = 0.0;
 
-    /* Drive Motor Characterization Values From SYSID */
+    /* Auto Align Values */
+    public static final double AUTO_ALIGN_KP = 0.07;
+    public static final double AUTO_ALIGN_KI = 0;
+    public static final double AUTO_ALIGN_KD = 0;
+
+    /* Drive Motor Feedforward */
     public static final double DRIVE_KS = 0.078838;
     public static final double DRIVE_KV = 2.5819;
     public static final double DRIVE_KA = 0.23783;
+
+    /* Simulator Values */
+    public static final double DRIVE_KP_SIM = 0.1;
+    public static final double DRIVE_KI_SIM = 0;
+    public static final double DRIVE_KD_SIM = 0;
+
+    public static final double TURN_KP_SIM = 10;
+    public static final double TURN_KI_SIM = 0;
+    public static final double TURN_KD_SIM = 0;
+
+    public static final double DRIVE_KS_SIM = 0;
+    public static final double DRIVE_KV_SIM = 0.13;
+
+    public static final double AUTO_ALIGN_KP_SIM = 0.02;
+    public static final double AUTO_ALIGN_KI_SIM = 0;
+    public static final double AUTO_ALIGN_KD_SIM = 0;
 
     /* Swerve Profiling Values */
 
@@ -100,44 +121,6 @@ public final class KSwerve {
      * Radians per Second
      */
     public static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
-
-
-
-
-    /* Neutral Modes */
-    public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
-    public static final NeutralModeValue driveNeutralMode = NeutralModeValue.Brake;
-
-    public static final double autoAlignKP = 0.07;
-    public static final double autoAlignKI = 0;
-    public static final double autoAlignKD = 0;
-
-    /**
-     * Pathfinding Constants for PathPlanner's Autobuilder Factory
-     */
-    public static final class PathfinderConstants {
-        /**
-         * Meters per second
-         */
-        public static final double MAX_VELOCITY = 2.0;
-        /**
-         * Meters per second squared
-         */
-        public static final double MAX_ACCELERATION = 3.0;
-        /**
-         * Radians per second
-         */
-        public static final double MAX_ANGULAR_VELOCITY = 2.0;
-        /**
-         * Radians per second squared
-         */
-        public static final double MAX_ANGULAR_ACCELERATION = 3.0;
-
-        public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(KSwerve.PathfinderConstants.MAX_VELOCITY,
-            KSwerve.PathfinderConstants.MAX_ACCELERATION,
-            KSwerve.PathfinderConstants.MAX_ANGULAR_VELOCITY,
-            KSwerve.PathfinderConstants.MAX_ANGULAR_ACCELERATION);
-    }
 
 
     /* Module Specific Constants */
