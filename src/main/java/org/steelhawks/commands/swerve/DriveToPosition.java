@@ -6,8 +6,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.steelhawks.Constants;
 import org.steelhawks.RobotContainer;
-
-import static org.steelhawks.lib.HawkMath.continuous180To360;
+import org.steelhawks.lib.Conversions;
 
 
 public class DriveToPosition extends Command {
@@ -33,7 +32,7 @@ public class DriveToPosition extends Command {
 
     @Override
     public void initialize() {
-        double robotHeading = continuous180To360(RobotContainer.s_Swerve.getRotation().getDegrees());
+        double robotHeading = Conversions.continuous180To360(RobotContainer.s_Swerve.getRotation().getDegrees());
         double setpoint = (robotHeading + mTarget.getRotation().getDegrees()) % 360;
 
         mAlignController.setSetpoint(setpoint);
@@ -53,7 +52,7 @@ public class DriveToPosition extends Command {
             ChassisSpeeds.fromFieldRelativeSpeeds(
                 mXPositionController.calculate(RobotContainer.s_Swerve.getPose().getX()),
                 mYPositionController.calculate(RobotContainer.s_Swerve.getPose().getY()),
-                mAlignController.calculate(continuous180To360(mTarget.getRotation().getDegrees())),
+                mAlignController.calculate(Conversions.continuous180To360(mTarget.getRotation().getDegrees())),
                 RobotContainer.s_Swerve.getRotation()
             )
         );

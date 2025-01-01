@@ -12,9 +12,9 @@ public final class Constants {
     /** The name of our robot. */
     public static final String ROBOT_NAME = "";
     /** Enables tuning mode, which allows values to be changed on the fly in AdvantageScope */
-    public static boolean TUNING_MODE = false;
+    public static final boolean TUNING_MODE = false;
     /** Enables whether simulation should play a replay of a real robot log. */
-    public static boolean IN_REPLAY_MODE = false;
+    public static final boolean IN_REPLAY_MODE = false;
 
     /** The CAN bus name on Phoenix Tuner */
     public static String CANIVORE_NAME = "canivore";

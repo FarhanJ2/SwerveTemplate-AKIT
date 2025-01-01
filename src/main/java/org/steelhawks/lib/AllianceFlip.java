@@ -34,6 +34,10 @@ public class AllianceFlip {
             translation3d.getY(), translation3d.getZ()) : translation3d;
     }
 
+    /**
+     * Decides if a pose should be flipped based on the current alliance color.
+     * @return true if the alliance is red, false otherwise
+     */
     public static boolean shouldFlip() {
         return DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get().equals(DriverStation.Alliance.Red);

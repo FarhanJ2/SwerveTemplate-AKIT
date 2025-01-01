@@ -1,5 +1,6 @@
 package org.steelhawks.commands.swerve;
 
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
@@ -19,13 +20,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import org.steelhawks.RobotContainer;
 import org.steelhawks.lib.AllianceFlip;
-import org.steelhawks.lib.HawkMath;
+import org.steelhawks.lib.Conversions;
 import org.steelhawks.subsystems.swerve.KSwerve;
 import org.steelhawks.subsystems.swerve.Swerve;
 
 public class DriveCommands {
 
-    private static final Debouncer mPidDebouncer = new Debouncer(0.1, DebounceType.kRising);
+    private static final Debouncer mSetpointDebouncer = new Debouncer(0.1, DebounceType.kRising);
     private static final Swerve s_Swerve = RobotContainer.s_Swerve;
 
     // we use offsets because our front of our robot for HawkRider is the Intake not the SHOOTER
@@ -42,7 +43,7 @@ public class DriveCommands {
      * @return The calculated rotation speed.
      */
     private static double getRotationSpeedFromPID(Pose2d target) {
-        double robotHeading = HawkMath.continuous180To360(s_Swerve.getRotation().getDegrees());
+        double robotHeading = Conversions.continuous180To360(s_Swerve.getRotation().getDegrees());
         double requestedAngle =
             s_Swerve.calculateTurnAngle(
                 target, s_Swerve.getRotation().getDegrees() + (AllianceFlip.shouldFlip() ?
@@ -53,7 +54,7 @@ public class DriveCommands {
         double rotationSpeed = (s_Swerve.isSlowMode() ? 5 : 1)
             * s_Swerve
             .getAlignPID()
-            .calculate(HawkMath.continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint);
+            .calculate(Conversions.continuous180To360(s_Swerve.getRotation().getDegrees()), setpoint);
 
         Logger.recordOutput("Align/RotationSpeed", rotationSpeed);
         Logger.recordOutput("Align/Robot Heading", robotHeading);
@@ -120,9 +121,6 @@ public class DriveCommands {
      * @return The command to rotate to the target angle.
      */
     public static Command rotateToAngle(Pose2d target) {
-        // cache with AtomicReference so we can use it in the lambda
-//        AtomicReference<Pose2d> validatedTarget = new AtomicReference<>(AllianceFlip.validate(target));
-
         return Commands.run(
             () -> {
                 Pose2d validatedTarget = AllianceFlip.validate(target);
@@ -136,13 +134,20 @@ public class DriveCommands {
                             s_Swerve.getRotation().plus(new Rotation2d(Math.PI))
                                 : s_Swerve.getRotation()));
             }, s_Swerve)
-                .until(() -> mPidDebouncer.calculate(s_Swerve.getAlignPID().atSetpoint()))
+                .until(() -> mSetpointDebouncer.calculate(s_Swerve.getAlignPID().atSetpoint()))
                     .beforeStarting(Commands.runOnce(() ->
                         getRotationSpeedFromPID(new Pose2d())))// reset PID setpoint
                             .withTimeout(3)
                                 .withName("Rotate to Angle");
     }
 
+    /**
+     * Command to drive to a specific position.
+     *
+     * @param target The target position the robot should drive to. Make sure this is a blue alliance pose if you want it to be flipped correctly.
+     * @param emergencyStop The supplier that will stop the command if it returns true.
+     * @return The command to drive to the target position.
+     */
     public static Command driveToPosition(Pose2d target, BooleanSupplier emergencyStop) {
         return AutoBuilder.pathfindToPose(target, AutonConstants.CONSTRAINTS)
             .onlyWhile(() -> s_Swerve.shouldContinuePathfinding(emergencyStop))
@@ -152,6 +157,13 @@ public class DriveCommands {
                             .withName("Drive to Position");
     }
 
+    /**
+     * Command to drive to a specific path.
+     *
+     * @param path The path the robot should drive to and then follow.
+     * @param emergencyStop The supplier that will stop the command if it returns true.
+     * @return The command to drive to the target path.
+     */
     public static Command driveToPath(PathPlannerPath path, BooleanSupplier emergencyStop) {
         return AutoBuilder.pathfindThenFollowPath(path, AutonConstants.CONSTRAINTS)
             .onlyWhile(() -> s_Swerve.shouldContinuePathfinding(emergencyStop))
@@ -161,6 +173,32 @@ public class DriveCommands {
                             .withName("Drive to Path");
     }
 
+    /**
+     * Command to drive to a specific position. This command will not stop until it reaches the target position.
+     *
+     * @param target The target position the robot should drive to. Make sure this is a blue alliance pose if you want it to be flipped correctly.
+     * @return The command to drive to the target position.
+     */
+    public static Command driveToPosition(Pose2d target) {
+        return driveToPosition(target, () -> false);
+    }
+
+    /**
+     * Command to drive to a specific path. This command will not stop until it reaches the target path.
+     *
+     * @param path The path the robot should drive to and then follow.
+     * @return The command to drive to the target path.
+     */
+    public static Command driveToPath(PathPlannerPath path) {
+        return driveToPath(path, () -> false);
+    }
+
+    /**
+     * Command to follow a path.
+     *
+     * @param path The path the robot should follow.
+     * @return The command to follow the path.
+     */
     public static Command followPath(PathPlannerPath path) {
         return AutoBuilder.followPath(path)
             .withName("Follow Path");

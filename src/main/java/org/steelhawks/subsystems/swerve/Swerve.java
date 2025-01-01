@@ -1,7 +1,6 @@
 package org.steelhawks.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -23,13 +22,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.steelhawks.Constants;
-import org.steelhawks.commands.swerve.DriveCommands;
 import org.steelhawks.lib.LocalADStarAK;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.lib.OdometryImpl;
 import org.steelhawks.Constants.*;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -288,15 +285,21 @@ public class Swerve extends SubsystemBase {
         return alignPID;
     }
 
-    /** Returns the calculated angle needed to reach the desired pose. */
-    public double calculateTurnAngle(Pose2d target, double robotAngle) {
+    /**
+     * Calculates the turn angle needed to face a pose, considering the wanted robot heading too.
+     *
+     * @param target The target pose to rotate to.
+     * @param requestedRobotHeading The heading the robot should be facing.
+     * @return The calculated turn angle.
+     */
+    public double calculateTurnAngle(Pose2d target, double requestedRobotHeading) {
         double tx = target.getX();
         double ty = target.getY();
         double rx = getPose().getX();
         double ry = getPose().getY();
 
         double requestedAngle = Math.atan((ty - ry) / (tx - rx)) * (180 / Math.PI);
-        double calculatedAngle = (180 - robotAngle + requestedAngle);
+        double calculatedAngle = (180 - requestedRobotHeading + requestedAngle);
 
         return ((calculatedAngle + 360) % 360);
     }
