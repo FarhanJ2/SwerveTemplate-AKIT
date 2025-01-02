@@ -139,7 +139,7 @@ public class Swerve extends SubsystemBase {
             module.updateInputs();
         }
         odometryLock.unlock();
-        Logger.processInputs("Drive/Gyro", gyroInputs);
+        Logger.processInputs("Swerve/Gyro", gyroInputs);
         for (var module : modules) {
             module.periodic();
         }

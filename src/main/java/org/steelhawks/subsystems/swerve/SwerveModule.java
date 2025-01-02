@@ -65,7 +65,7 @@ public class SwerveModule {
     }
 
     public void periodic() {
-        Logger.processInputs("Drive/Module" + index, inputs);
+        Logger.processInputs("Swerve/Module" + index, inputs);
 
         // On first cycle, reset relative turn encoder
         // Wait until absolute angle is nonzero in case it wasn't initialized yet
