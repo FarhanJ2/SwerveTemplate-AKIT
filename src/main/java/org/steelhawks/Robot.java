@@ -128,7 +128,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        autonomousCommand = Autos.getAutonomousCommand();
+//        autonomousCommand = Autos.getAutonomousCommand();
+        autonomousCommand = Autos.testPathfinder();
 
         if (autonomousCommand != null) {
             autonomousCommand.schedule();

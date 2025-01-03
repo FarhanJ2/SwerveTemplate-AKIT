@@ -76,9 +76,9 @@ public class RobotContainer {
         if (mRan) return;
 
         /* Does nothing, just gets the library ready */
-        PathfindingCommand.warmupCommand()
-            .finallyDo(() -> s_Swerve.setPose(isRed ? FieldConstants.RED_ORIGIN : FieldConstants.BLUE_ORIGIN)) // add this to reset to origin as warmup moves robot pose
-            .schedule();
+//        PathfindingCommand.warmupCommand()
+//            .finallyDo(() -> s_Swerve.setPose(isRed ? FieldConstants.RED_ORIGIN : FieldConstants.BLUE_ORIGIN)) // add this to reset to origin as warmup moves robot pose
+//            .schedule();
 
         configurePathfindingCommands();
         mRan = true;

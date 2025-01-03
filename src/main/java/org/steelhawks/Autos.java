@@ -2,10 +2,15 @@ package org.steelhawks;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.steelhawks.Constants.*;
+import org.steelhawks.commands.swerve.DriveCommands;
+
 import java.util.Map;
 
 public final class Autos {
@@ -109,5 +114,14 @@ public final class Autos {
 
     public static String getAutonName() {
         return AutonMode.getAutonName(getSelector());
+    }
+
+    public static Command testPathfinder() {
+        return Commands.runOnce(() -> RobotContainer.s_Swerve.setPose(
+            new Pose2d(new Translation2d(1.896013, 5.615929), new Rotation2d())))
+            .andThen(
+                DriveCommands.driveToPosition(NotePose.NOTE_02)
+            );
+
     }
 }
