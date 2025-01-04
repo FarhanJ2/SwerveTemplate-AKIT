@@ -55,25 +55,25 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     public ModuleIOTalonFX(int index) {
         switch (index) {
-            case 0:
+            case 0: // fl
                 driveTalon = new TalonFX(1, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(2, Constants.CANIVORE_NAME);
                 canCoder = new CANcoder(3, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-130.17);
                 break;
-            case 1:
+            case 1: // fr
                 driveTalon = new TalonFX(4, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(5, Constants.CANIVORE_NAME);
                 canCoder = new CANcoder(6, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-51.34);
                 break;
-            case 2:
+            case 2: // bl
                 driveTalon = new TalonFX(7, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(8, Constants.CANIVORE_NAME);
                 canCoder = new CANcoder(9, Constants.CANIVORE_NAME);
                 absoluteEncoderOffset = Rotation2d.fromDegrees(-63.9);
                 break;
-            case 3:
+            case 3: // br
                 driveTalon = new TalonFX(10, Constants.CANIVORE_NAME);
                 turnTalon = new TalonFX(11, Constants.CANIVORE_NAME);
                 canCoder = new CANcoder(12, Constants.CANIVORE_NAME);

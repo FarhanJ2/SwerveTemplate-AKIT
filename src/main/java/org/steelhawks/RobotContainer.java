@@ -8,6 +8,8 @@ package org.steelhawks;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -75,12 +77,6 @@ public class RobotContainer {
 
         if (mRan) return;
 
-        /* Does nothing, just gets the library ready */
-//        PathfindingCommand.warmupCommand()
-//            .finallyDo(() -> s_Swerve.setPose(isRed ? FieldConstants.RED_ORIGIN : FieldConstants.BLUE_ORIGIN)) // add this to reset to origin as warmup moves robot pose
-//            .schedule();
-
-        configurePathfindingCommands();
         mRan = true;
     }
 
@@ -133,6 +129,7 @@ public class RobotContainer {
             }
         }
 
+        configurePathfindingCommands();
         configureDefaultCommands();
         configureSysIdBindings();
         configureTestCommands();
@@ -167,7 +164,21 @@ public class RobotContainer {
             "Bottom Flywheel SysId (Quasistatic Reverse)", s_Flywheel.runSysIdQuasistaticBottom(SysIdRoutine.Direction.kReverse));
     }
 
-    private void configurePathfindingCommands() {}
+    private void configurePathfindingCommands() {
+        driver.povLeft()
+            .onTrue(
+                DriveCommands.driveToPosition(NotePose.NOTE_02,
+                        () -> Math.abs(driver.getLeftY()
+                        + driver.getLeftX()
+                        + driver.getRightX()) > 0.1));
+
+        driver.povRight()
+            .onTrue(
+                Commands.runOnce(() ->
+                    s_Swerve.setPose(
+                        new Pose2d(new Translation2d(1.472591, 5.563001), new Rotation2d()))));
+
+    }
 
     SendableChooser<Pose2d> chooser = new SendableChooser<>();
 

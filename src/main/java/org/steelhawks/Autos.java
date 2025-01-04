@@ -115,13 +115,4 @@ public final class Autos {
     public static String getAutonName() {
         return AutonMode.getAutonName(getSelector());
     }
-
-    public static Command testPathfinder() {
-        return Commands.runOnce(() -> RobotContainer.s_Swerve.setPose(
-            new Pose2d(new Translation2d(1.896013, 5.615929), new Rotation2d())))
-            .andThen(
-                DriveCommands.driveToPosition(NotePose.NOTE_02)
-            );
-
-    }
 }

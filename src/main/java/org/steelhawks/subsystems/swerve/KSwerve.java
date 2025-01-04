@@ -79,7 +79,7 @@ public final class KSwerve {
     public static final double TURN_KD = 0.0;
 
     /* Auto Align Values */
-    public static final double AUTO_ALIGN_KP = 0.07;
+    public static final double AUTO_ALIGN_KP = 0.02;
     public static final double AUTO_ALIGN_KI = 0;
     public static final double AUTO_ALIGN_KD = 0;
 
