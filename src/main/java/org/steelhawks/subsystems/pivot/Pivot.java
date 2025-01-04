@@ -72,6 +72,8 @@ public class Pivot extends SubsystemBase {
             }
         }
 
+//        setDefault(setPivotHome());
+
         enable();
     }
 
@@ -117,7 +119,7 @@ public class Pivot extends SubsystemBase {
     }
 
     public Command setPivotHome() {
-        return Commands.run(() -> setDesiredState(0));
+        return Commands.run(() -> setDesiredState(1.05), this);
     }
 
 

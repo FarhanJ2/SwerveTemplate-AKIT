@@ -165,12 +165,21 @@ public class RobotContainer {
     }
 
     private void configurePathfindingCommands() {
-        driver.povLeft()
-            .onTrue(
-                DriveCommands.driveToPosition(NotePose.NOTE_02,
-                        () -> Math.abs(driver.getLeftY()
-                        + driver.getLeftX()
-                        + driver.getRightX()) > 0.1));
+//        driver.povUp()
+//            .onTrue(
+//                DriveCommands.driveToPosition(NotePose.NOTE_02,
+//                        () -> Math.abs(driver.getLeftY()
+//                        + driver.getLeftX()
+//                        + driver.getRightX()) > 0.1));
+
+        driver.povUp()
+                .onTrue(
+                    DriveCommands.driveToPosition(
+                        new Pose2d(
+                            new Translation2d(2.478219, 5.430681), new Rotation2d()
+                        )
+                    )
+                );
 
         driver.povRight()
             .onTrue(
@@ -257,5 +266,7 @@ public class RobotContainer {
                 () -> -driver.getLeftX(),
                 () -> -driver.getRightX(),
                 driver.leftTrigger(.5)));
+
+        s_Pivot.setDefaultCommand(s_Pivot.setPivotHome());
     }
 }

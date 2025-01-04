@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.steelhawks.Constants;
 
@@ -19,6 +20,8 @@ public class PivotIOTalonFX implements PivotIO {
     public PivotIOTalonFX() {
         mPivotMotor = new TalonFX(KPivot.PIVOT_ID, Constants.CANIVORE_NAME);
         mPivotEncoder = new CANcoder(KPivot.PIVOT_ENCODER_ID, Constants.CANIVORE_NAME);
+
+        mPivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
         pivotMotorAppliedVolts = mPivotMotor.getMotorVoltage();
         pivotMotorVelocity = mPivotMotor.getVelocity();
