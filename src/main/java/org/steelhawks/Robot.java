@@ -5,28 +5,28 @@
 
 package org.steelhawks;
 
-import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.PathPlannerLogging;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.steelhawks.commands.swerve.DriveCommands;
 import org.steelhawks.lib.Alert.AlertType;
 import org.steelhawks.lib.Alert;
-import org.steelhawks.lib.LocalADStarAK;
 import org.steelhawks.subsystems.LED;
 
 public class Robot extends LoggedRobot {
@@ -128,7 +128,14 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
-        autonomousCommand = Autos.getAutonomousCommand();
+//        autonomousCommand = Autos.getAutonomousCommand();
+        autonomousCommand =
+            Commands.runOnce(
+                () -> RobotContainer.s_Swerve
+                    .setPose(new Pose2d(1.3314553499221802, 5.544997215270996, new Rotation2d())))
+                .andThen(
+                    DriveCommands.followPath(
+                        PathPlannerPath.fromChoreoTrajectory("test forward")));
 
         if (autonomousCommand != null) {
             autonomousCommand.schedule();

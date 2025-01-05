@@ -74,9 +74,9 @@ public final class KSwerve {
     public static final double DRIVE_KI = 0.0;
     public static final double DRIVE_KD = 0.0;
 
-    public static final double TURN_KP = 7.0; // this might be 100 check with your robot
+    public static final double TURN_KP = 13.0; // this might be 100 check with your robot // was 7.0
     public static final double TURN_KI = 0.0;
-    public static final double TURN_KD = 0.0;
+    public static final double TURN_KD = 1.0;
 
     /* Auto Align Values */
     public static final double AUTO_ALIGN_KP = 0.02;

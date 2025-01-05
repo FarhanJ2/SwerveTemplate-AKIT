@@ -34,7 +34,7 @@ import java.util.function.BooleanSupplier;
 import static edu.wpi.first.units.Units.Volts;
 
 public class Swerve extends SubsystemBase {
-    private static double SPEED_MULTIPLIER = 1.0;
+    private static double SPEED_MULTIPLIER = 0.2;
 
     public static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;

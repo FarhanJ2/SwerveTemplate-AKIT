@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 import org.steelhawks.Constants;
+import org.steelhawks.lib.TunableNumber;
 
 
 public class SwerveModule {
@@ -27,6 +28,10 @@ public class SwerveModule {
     private Rotation2d turnRelativeOffset = null; // Relative + Offset = Absolute
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
+    public TunableNumber mKP = new TunableNumber("TurnMotor/kP", KSwerve.TURN_KP);
+    public TunableNumber mKI = new TunableNumber("TurnMotor/kI", KSwerve.TURN_KI);
+    public TunableNumber mKD = new TunableNumber("TurnMotor/kD", KSwerve.TURN_KD);
+
     public SwerveModule(ModuleIO io, int index) {
         this.io = io;
         this.index = index;
@@ -38,7 +43,7 @@ public class SwerveModule {
             case REPLAY:
                 driveFeedforward = new SimpleMotorFeedforward(KSwerve.DRIVE_KS, KSwerve.DRIVE_KV, KSwerve.DRIVE_KA);
                 driveFeedback = new PIDController(KSwerve.DRIVE_KP, KSwerve.DRIVE_KI, KSwerve.DRIVE_KD);
-                turnFeedback = new PIDController(KSwerve.TURN_KP, KSwerve.TURN_KI, KSwerve.TURN_KD);
+                turnFeedback = new PIDController(KSwerve.TURN_KP, KSwerve.TURN_KI, KSwerve.TURN_KD); // 13 kp : kd 1
                 break;
             case SIM:
                 driveFeedforward = new SimpleMotorFeedforward(KSwerve.DRIVE_KS_SIM, KSwerve.DRIVE_KV_SIM);
@@ -62,6 +67,15 @@ public class SwerveModule {
      */
     public void updateInputs() {
         io.updateInputs(inputs);
+
+        if (mKP.hasChanged() ||
+            mKI.hasChanged() ||
+            mKP.hasChanged()) {
+            turnFeedback.setPID(
+                mKP.get(),
+                mKI.get(),
+                mKD.get());
+        }
     }
 
     public void periodic() {

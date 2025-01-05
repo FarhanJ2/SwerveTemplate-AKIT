@@ -172,15 +172,6 @@ public class RobotContainer {
                         + driver.getLeftX()
                         + driver.getRightX()) > 0.1));
 
-//        driver.povUp()
-//                .onTrue(
-//                    DriveCommands.driveToPosition(
-//                        new Pose2d(
-//                            new Translation2d(2.478219, 5.430681), new Rotation2d()
-//                        )
-//                    )
-//                );
-
         driver.povRight()
             .onTrue(
                 Commands.runOnce(() ->
