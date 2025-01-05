@@ -103,13 +103,13 @@ public final class Constants {
     }
 
     public static class AutonConstants {
-        public static final double TRANSLATION_KP = 0.0;
-        public static final double TRANSLATION_KI = 0.0;
+        public static final double TRANSLATION_KP = 1.0;
+        public static final double TRANSLATION_KI = 0.001;
         public static final double TRANSLATION_KD = 0.0;
 
-        public static final double ROTATION_KP = 0.0;
-        public static final double ROTATION_KI = 0.0;
-        public static final double ROTATION_KD = 0.0;
+        public static final double ROTATION_KP = 0.1;
+        public static final double ROTATION_KI = 0.0011;
+        public static final double ROTATION_KD = 0.01;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 1.0;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1.0;
